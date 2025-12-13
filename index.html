@@ -3,27 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>幸运抽取</title>
+    <title>别紧张</title>
+    <link rel="icon" href="https://pic1.imgdb.cn/item/693d67f925ec9c13612be403.jpg" type="image/jpeg">
+    
     <style>
-        /* --- 全局样式：黑白极简风格 --- */
+        /* --- 全局样式 --- */
         body {
             margin: 0;
             padding: 0;
             background-color: #ffffff;
             color: #000000;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between; 
             overflow: hidden;
-            perspective: 1000px; 
+            perspective: 1000px;
         }
 
-        /* --- 顶部：头像区域 --- */
+        .main-content {
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+        }
+
+        /* --- 过滤器样式 --- */
+        .filter-container {
+            position: relative;
+            z-index: 1000;
+            margin-bottom: 20px;
+            display: flex; 
+        }
+
+        #btn-filter {
+            background-color: #fff;
+            color: #000;
+            border: 1px solid #e0e0e0;
+            padding: 10px 24px;
+            min-width: 120px;
+            font-size: 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        #btn-filter:hover {
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+
+        #btn-filter.active {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .filter-menu {
+            position: absolute;
+            top: calc(100% + 10px); 
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background-color: #fff;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 6px;
+            min-width: 140px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .filter-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .filter-option {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            border-radius: 10px;
+            text-align: center;
+            transition: background-color 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .filter-option:last-child { margin-bottom: 0; }
+        .filter-option:hover { background-color: #f5f5f5; }
+
+        .filter-option.base-option.selected {
+            background-color: #000;
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .filter-option.bonus-option { color: #333; font-weight: normal; }
+        .filter-option.bonus-option:hover { background-color: #f5f5f5; }
+        
+        .filter-option.bonus-skill.selected {
+            background-color: #ff9800; 
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .filter-option.bonus-teacher.selected {
+            background-color: #2196f3; 
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .filter-separator {
+            height: 1px;
+            background-color: #eee;
+            margin: 6px 0;
+        }
+
+        /* --- 头像区域 --- */
         .top-section {
-            height: 250px;
+            height: 220px;
             width: 100%;
             display: flex;
             align-items: center;
@@ -34,68 +145,132 @@
         .avatar-container {
             width: 200px;
             height: 200px;
-            border-radius: 30px; 
+            border-radius: 40px;
             overflow: hidden;
             border: 4px solid #000;
             opacity: 0; 
-            transform: scale(0.8); 
-            transition: all 0.3s ease; 
+            transform: scale(0.8);
+            /* **修改点 1:** 增加 background-color: #fff; 防止闪白 */
+            transition: opacity 0.3s ease, transform 0.3s ease; 
             cursor: pointer;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative; 
+            background-color: #fff; 
         }
-
+        
         .avatar-container.show {
             opacity: 1;
             transform: scale(1);
         }
 
-        /* Hover 旋转特效 */
-        .avatar-container:hover {
-            transform: rotate(15deg) scale(1.1); 
+        .avatar-container:hover:not(.no-hover-effect) {
+            transform: rotate(15deg) scale(1.1);
             transition: transform 0.4s ease-in-out;
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
         
-        /* --- 抽卡动画：翻转两圈 --- */
-        .avatar-container.card-animate {
-            transition: none; 
-            opacity: 1 !important;
-            animation: card-flip 1.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            animation-fill-mode: forwards; 
+        .avatar-container.hide-img .avatar-img {
+            display: none;
+        }
+
+        /* --- 技能/老师文字优化 --- */
+        .non-person-name {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 居中核心代码 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center; 
+            
+            font-size: 32px; 
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            line-height: 1.3;
+            padding: 20px; 
+            box-sizing: border-box; 
+            word-break: break-word; 
         }
         
+        .skill-item .non-person-name { background-color: #ff9800; }
+        .teacher-item .non-person-name { background-color: #2196f3; }
+        
+        /* --- 动画特效 --- */
+        
+        /* 1. 普通翻转动画 */
+        .avatar-container.card-animate {
+            transition: none;
+            opacity: 1 !important;
+            animation: card-flip 1.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
         @keyframes card-flip {
             0% { transform: scale(0.5) rotateY(0deg) rotateZ(-10deg); opacity: 0; }
-            40% { transform: scale(1.1) rotateY(360deg) rotateZ(5deg); opacity: 1; } 
-            70% { transform: scale(1.05) rotateY(720deg) rotateZ(-2deg); } 
-            100% { transform: scale(1) rotateY(720deg) rotateZ(0deg); opacity: 1; } 
+            40% { transform: scale(1.1) rotateY(360deg) rotateZ(5deg); opacity: 1; }
+            70% { transform: scale(1.05) rotateY(720deg) rotateZ(-2deg); }
+            100% { transform: scale(1) rotateY(720deg) rotateZ(0deg); opacity: 1; }
+        }
+        
+        /* 2. 老师/技能 炫酷爆炸动画 */
+        .special-draw-effect {
+            transition: none;
+            opacity: 1 !important;
+            animation: super-explosion 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes super-explosion {
+            0% { 
+                transform: scale(0) rotate(0deg); 
+                opacity: 0;
+                box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+            }
+            40% { 
+                transform: scale(1.2) rotate(-5deg); 
+                opacity: 1;
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), 0 0 100px rgba(255, 140, 0, 0.6);
+            }
+            60% {
+                transform: scale(1.1) rotate(5deg);
+                box-shadow: 0 0 80px rgba(255, 215, 0, 1), 0 0 150px rgba(255, 69, 0, 0.8);
+            }
+            80% {
+                transform: scale(1.05) rotate(-2deg);
+            }
+            100% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1;
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); 
+            }
         }
 
         /* --- 光效 --- */
-        .glow-rare { 
-            box-shadow: 0 0 15px rgba(0, 191, 255, 0.7), 0 0 30px rgba(0, 191, 255, 0.5);
+        .glow-rare {
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.6), 0 0 40px rgba(0, 191, 255, 0.3);
             border-color: rgba(0, 191, 255, 0.8) !important;
         }
-        .glow-epic { 
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.7), 0 0 30px rgba(138, 43, 226, 0.5);
+        .glow-epic {
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.6), 0 0 40px rgba(138, 43, 226, 0.3);
             border-color: rgba(138, 43, 226, 0.8) !important;
         }
-        .glow-legend { 
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.9), 0 0 30px rgba(255, 215, 0, 0.7);
+        .glow-legend {
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.5);
             border-color: rgba(255, 215, 0, 0.9) !important;
         }
 
         .avatar-img {
             width: 100%;
             height: 100%;
-            object-fit: cover; 
+            object-fit: cover;
         }
         
-        /* --- 中间/底部样式 --- */
+        /* --- 中间：名字显示 --- */
         .middle-section {
             margin-bottom: 40px;
             text-align: center;
-            height: 80px; 
+            height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -104,181 +279,249 @@
         #name-display {
             font-size: 48px;
             font-weight: 800;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             padding: 10px 40px;
-            border-radius: 20px;
+            border-radius: 24px;
             background-color: #f7f7f7;
-            border: 2px solid #eee;
-            min-width: 300px;
-            
-            /* 【新增/修改】为了实现替换动画，需要确保溢出被裁剪 */
-            overflow: hidden; 
-            /* 必须是相对定位，才能使用绝对定位的伪元素或子元素动画，
-               虽然这里直接动画容器，但确保 transform 生效 */
-            position: relative; 
+            border: 2px solid #f0f0f0;
+            min-width: 320px;
+            overflow: hidden;
+            position: relative;
+            color: #1a1a1a;
         }
 
-        /* --- 【新增】名字切换动画：向上顶掉效果 --- */
         @keyframes slideOutUp {
             0% { transform: translateY(0); opacity: 1; }
             100% { transform: translateY(-100%); opacity: 0; }
         }
-
         @keyframes slideInUp {
             0% { transform: translateY(100%); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
+        .slide-out-up { animation: slideOutUp 0.2s ease-in forwards; }
+        .slide-in-up { animation: slideInUp 0.3s ease-out forwards; }
 
-        .slide-out-up {
-            /* 0.2秒滑出 */
-            animation: slideOutUp 0.2s ease-in forwards; 
-        }
-        .slide-in-up {
-            /* 0.3秒滑入 */
-            animation: slideInUp 0.3s ease-out forwards;
-        }
-
-        /* --- 底部按钮样式（保持不变）--- */
+        /* --- 底部按钮区域 --- */
         .bottom-section {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
-        button {
+        button.action-btn {
             background-color: #000;
             color: #fff;
             border: none;
-            padding: 15px 50px;
+            padding: 16px 48px; 
             font-size: 18px;
-            font-weight: bold;
-            border-radius: 50px; 
+            font-weight: 700;
+            border-radius: 100px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             outline: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        button:hover {
+        button.action-btn:hover {
             background-color: #333;
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
-        button:active {
-            transform: translateY(0);
+        button.action-btn:active { transform: translateY(0); }
+        button.action-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        /* --- 显示原名按钮 (实现平滑过渡) --- */
+        /* 显示原名按钮 */
         #btn-reveal {
             background-color: #fff;
             color: #000;
             border: 2px solid #000;
-            
-            /* 初始隐藏状态：通过 opacity 和 visibility 隐藏 */
             opacity: 0;
             visibility: hidden;
-            /* 初始位置：向下移动，准备向上滑入 */
-            transform: translateY(20px); 
-            
-            /* 启用过渡动画 */
-            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-
-            /* 保持按钮本身的外观样式 */
-            padding: 15px 50px; 
-            border-radius: 50px; 
-            font-size: 18px;
+            transform: translateY(15px);
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            padding: 14px 40px;
+            border-radius: 100px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        #btn-reveal:hover {
-            background-color: #f0f0f0;
-        }
-
-        /* 按钮显示状态类 */
+        #btn-reveal:hover { background-color: #f7f7f7; }
         .reveal-show {
             opacity: 1 !important;
             visibility: visible !important;
-            transform: translateY(0) !important; /* 归位，实现上滑效果 */
+            transform: translateY(0) !important;
         }
+        .reveal-hidden {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none;
+        }
+        
+        /* --- Footer --- */
+        .footer {
+            width: 100%;
+            padding: 12px 0;
+            background-color: #fafafa;
+            border-top: none;
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+        .footer-separator { color: #ddd; font-size: 14px; }
+        .footer-github a {
+            color: #888;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.3s;
+        }
+        .footer-github a:hover { color: #000; }
+        .github-icon { width: 18px; height: 18px; fill: currentColor; display: block; }
 
     </style>
 </head>
 <body>
 
-    <div class="top-section">
-        <div class="avatar-container" id="avatar-box">
-            <img src="" alt="Avatar" class="avatar-img" id="avatar-img">
+    <div class="main-content">
+        <div class="filter-container">
+            <div id="btn-filter" title="点击选择抽取范围">
+                <span id="filter-text">所有人</span>
+                <span style="font-size: 10px; opacity: 0.5;">▼</span>
+            </div>
+            <div class="filter-menu" id="filter-menu">
+                <div class="filter-option base-option selected" data-type="group" data-value="所有人">所有人</div>
+                <div class="filter-option base-option" data-type="group" data-value="生物">生物</div>
+                <div class="filter-option base-option" data-type="group" data-value="政治">政治</div>
+                
+                <div class="filter-separator"></div>
+                
+                <div class="filter-option bonus-option bonus-skill" data-type="bonus" data-value="技能">技能</div>
+                <div class="filter-option bonus-option bonus-teacher" data-type="bonus" data-value="老师">老师</div>
+            </div>
+        </div>
+        
+        <div class="top-section">
+            <div class="avatar-container" id="avatar-box">
+                <div class="non-person-name" id="non-person-name-display" style="display: none;"></div>
+                <img src="" alt="Avatar" class="avatar-img" id="avatar-img">
+            </div>
+        </div>
+
+        <div class="middle-section">
+            <div id="name-display">别紧张</div> 
+        </div>
+
+        <div class="bottom-section">
+            <button id="btn-main" class="action-btn">开始滚动</button>
+            <button id="btn-reveal">显示原名</button>
         </div>
     </div>
-
-    <div class="middle-section">
-        <div id="name-display">准备就绪</div>
-    </div>
-
-    <div class="bottom-section">
-        <button id="btn-main">开始滚动</button>
-        <button id="btn-reveal">显示原名</button>
+    
+    <div class="footer">
+        <span>Copyright © Tachibana Kousuke 2025</span>
+        <span class="footer-separator">|</span>
+        <span class="footer-github">
+            <a href="https://github.com/TachibanaKousuke/Lucky-Draw" target="_blank" title="访问 GitHub 仓库">
+                <svg class="github-icon" viewBox="0 0 16 16" version="1.1" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2h.02c0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+        </span>
     </div>
 
     <script>
         // --- 1. 数据配置区域 ---
         const database = [
-            // 注意：你的数据已使用，如果需要更换请替换此数组
-            { nickname: "青行归", realname: "艾炜杰", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9da.jpg" },
-            { nickname: "Tiamo", realname: "艾文博", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dc.jpg" },
-            { nickname: "blue IHrNm", realname: "曹瑾瑜", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9db.jpg" },
-            { nickname: "陳风", realname: "陈林霄", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dd.jpg" },
-            { nickname: "田田小影子", realname: "陈荍影", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9d9.jpg" },
-            { nickname: "CzX", realname: "陈在芯", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9eb.jpg" },
-            { nickname: "🤐", realname: "程恩泽", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ec.jpg" },
-            { nickname: "Il sole.", realname: "邓淼", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ed.jpg" },
-            { nickname: "pit pony", realname: "邓萧晓", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ee.jpg" },
-            { nickname: "白狗黑", realname: "冯麒霏", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b991.jpg" },
-            { nickname: "高冷人士没有微信", realname: "高涵予", avatarUrl: "https://api.dicebear.com/7.x/identicon/svg?seed=Felix" },
-            { nickname: "泱泱清潭", realname: "高一淳", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f6.jpg" },
-            { nickname: "萝卜丝比尔", realname: "辜孙雨辰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f9.jpg" },
-            { nickname: "欧皇知底", realname: "何宜嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328436d1e741a32bf1b993.jpg" },
-            { nickname: "千", realname: "韩铭杰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f7.jpg" },
-            { nickname: "步法鹅", realname: "衡星玙", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f7.jpg" },
-            { nickname: "情商巅峰时期", realname: "胡铸", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba05.jpg" },
-            { nickname: "黄小妹", realname: "黄彦洁", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba02.jpg" },
-            { nickname: "无恙.", realname: "李安然", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba01.jpg" },
-            { nickname: "Touma Kazusa", realname: "李柯锦", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba03.jpg" },
-            { nickname: "Camilla", realname: "李林蔚", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba04.jpg" },
-            { nickname: "Eschatology", realname: "廖家嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba10.jpg" },
-            { nickname: "有悠", realname: "廖轩浩", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba12.jpg" },
-            { nickname: "刘轩", realname: "刘轩", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98d.jpg" },
-            { nickname: "轩🏃🏀", realname: "吕子轩", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b992.jpg" },
-            { nickname: "揽星河", realname: "马星灿", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba11.jpg" },
-            { nickname: "小天才杏宝", realname: "彭渝中", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1a.jpg" },
-            { nickname: "我又不是苦力", realname: "唐菱蔚", avatarUrl: "https://pic1.imgdb.cn/item/693286fdd1e741a32bf1bd63.jpg" },
-            { nickname: "小王在此刻", realname: "王爱阳", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1b.jpg" },
-            { nickname: "涵", realname: "王乙涵", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba19.jpg" },
-            { nickname: "一北极光", realname: "王懿", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1c.jpg" },
-            { nickname: "q7l12", realname: "王颖萱", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1d.jpg" },
-            { nickname: "Hello", realname: "王赞杰", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba23.jpg" },
-            { nickname: "Tachibana Kousuke", realname: "韦景皓", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba21.jpg" },
-            { nickname: "Anonymous", realname: "魏熙芮", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba25.jpg" },
-            { nickname: "文三", realname: "文思睿", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba22.jpg" },
-            { nickname: "WCSDM", realname: "吴向玉", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98f.jpg" },
-            { nickname: "西瓜刨冰", realname: "鲜卓彤", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba29.jpg" },
-            { nickname: "惟楚有才", realname: "徐楚烦", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2b.jpg" },
-            { nickname: "续叙序", realname: "徐子恒", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2c.jpg" },
-            { nickname: "旋转℃的时光", realname: "杨成宇", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2a.jpg" },
-            { nickname: "Nernst", realname: "杨若雷", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2d.jpg" },
-            { nickname: "鼠了", realname: "杨宣浩", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba31.jpg" },
-            { nickname: "雏鸣", realname: "杨懿", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba34.jpg" },
-            { nickname: "Ray", realname: "张淙睿", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba32.jpg" },
-            { nickname: "丝血反虾闰土的猹", realname: "张梓轩", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba35.jpg" },
-            { nickname: "AQ", realname: "赵潜", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba33.jpg" },
-            { nickname: "(＞＜)", realname: "赵秋玉", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3a.jpg" },
-            { nickname: "Zfang", realname: "郑放", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3c.jpg" },
-            { nickname: "Emmanuel", realname: "周柯运", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98e.jpg" },
-            { nickname: "y", realname: "邹天杰", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3b.jpg" },
+            { nickname: "青行归", realname: "艾炜杰", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9da.jpg", subject: "政治" },
+            { nickname: "Tiamo", realname: "艾文博", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dc.jpg", subject: "生物" },
+            { nickname: "blue IHrNm", realname: "曹瑾瑜", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9db.jpg", subject: "政治" },
+            { nickname: "陳风", realname: "陈林霄", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dd.jpg", subject: "生物" },
+            { nickname: "田田小影子", realname: "陈荍影", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9d9.jpg", subject: "政治" },
+            { nickname: "CzX", realname: "陈在芯", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9eb.jpg", subject: "生物" },
+            { nickname: "🤐", realname: "程恩泽", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ec.jpg", subject: "生物" },
+            { nickname: "Il sole.", realname: "邓淼", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ed.jpg", subject: "生物" },
+            { nickname: "pit pony", realname: "邓萧晓", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ee.jpg", subject: "生物" },
+            { nickname: "白狗黑", realname: "冯麒霏", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b991.jpg", subject: "政治" },
+            { nickname: "高冷人士没有微信", realname: "高涵予", avatarUrl: "https://api.dicebear.com/7.x/identicon/svg?seed=Felix", subject: "生物" },
+            { nickname: "泱泱清潭", realname: "高一淳", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f6.jpg", subject: "生物" },
+            { nickname: "萝卜丝比尔", realname: "辜孙雨辰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f9.jpg", subject: "政治" },
+            { nickname: "欧皇知底", realname: "何亦嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328436d1e741a32bf1b993.jpg", subject: "生物" },
+            { nickname: "千", realname: "韩铭杰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f7.jpg", subject: "生物" },
+            { nickname: "步法鹅", realname: "衡星玙", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f5.jpg", subject: "生物" },
+            { nickname: "情商巅峰时期", realname: "胡铸", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba05.jpg", subject: "生物" },
+            { nickname: "黄小妹", realname: "黄彦洁", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba02.jpg", subject: "生物" },
+            { nickname: "无恙.", realname: "李安然", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba01.jpg", subject: "生物" },
+            { nickname: "Touma Kazusa", realname: "李柯锦", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba03.jpg", subject: "生物" },
+            { nickname: "Camilla", realname: "李林蔚", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba04.jpg", subject: "生物" },
+            { nickname: "Eschatology", realname: "廖家嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba10.jpg", subject: "生物" },
+            { nickname: "有悠", realname: "廖轩浩", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba12.jpg", subject: "政治" },
+            { nickname: "刘轩", realname: "刘轩", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98d.jpg", subject: "政治" },
+            { nickname: "轩🏃🏀", realname: "吕子轩", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b992.jpg", subject: "生物" },
+            { nickname: "揽星河", realname: "马星灿", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba11.jpg", subject: "生物" },
+            { nickname: "小天才杏宝", realname: "彭渝中", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1a.jpg", subject: "政治" },
+            { nickname: "我又不是苦力", realname: "唐菱蔚", avatarUrl: "https://pic1.imgdb.cn/item/693286fdd1e741a32bf1bd63.jpg", subject: "生物" },
+            { nickname: "小王在此刻", realname: "王爱阳", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1b.jpg", subject: "政治" },
+            { nickname: "涵", realname: "王乙涵", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba19.jpg", subject: "生物" },
+            { nickname: "一北极光", realname: "王懿", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1c.jpg", subject: "生物" },
+            { nickname: "q7l12", realname: "王颖萱", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1d.jpg", subject: "生物" },
+            { nickname: "Hello", realname: "王赞杰", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba23.jpg", subject: "生物" },
+            { nickname: "Tachibana Kousuke", realname: "韦景皓", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba21.jpg", subject: "生物" },
+            { nickname: "Anonymous", realname: "魏熙芮", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba25.jpg", subject: "生物" },
+            { nickname: "文三", realname: "文思睿", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba22.jpg", subject: "生物" },
+            { nickname: "WCSDM", realname: "吴向玉", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98f.jpg", subject: "生物" },
+            { nickname: "西瓜刨冰", realname: "鲜卓彤", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba29.jpg", subject: "政治" },
+            { nickname: "惟楚有才", realname: "徐楚烦", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2b.jpg", subject: "生物" },
+            { nickname: "续叙序", realname: "徐子恒", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2c.jpg", subject: "政治" },
+            { nickname: "旋转℃的时光", realname: "杨成宇", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2a.jpg", subject: "生物" },
+            { nickname: "Nernst", realname: "杨若雷", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2d.jpg", subject: "生物" },
+            { nickname: "鼠了", realname: "杨宣浩", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba31.jpg", subject: "政治" },
+            { nickname: "雏鸣", realname: "杨懿", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba34.jpg", subject: "生物" },
+            { nickname: "Ray", realname: "张淙睿", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba32.jpg", subject: "生物" },
+            { nickname: "丝血反虾闰土的猹", realname: "张梓轩", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba35.jpg", subject: "生物" },
+            { nickname: "AQ", realname: "赵潜", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba33.jpg", subject: "政治" },
+            { nickname: "(＞＜)", realname: "赵秋玉", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3a.jpg", subject: "生物" },
+            { nickname: "Zfang", realname: "郑放", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3c.jpg", subject: "生物" },
+            { nickname: "Emmanuel", realname: "周柯运", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98e.jpg", subject: "生物" },
+            { nickname: "y", realname: "邹天杰", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3b.jpg", subject: "生物" },
+            { nickname: "LZZN", realname: "刘知易", avatarUrl: "https://pic1.imgdb.cn/item/693d6d7ffe7cfeca3822ee6f.jpg", subject: "生物" },
+        ];
+        
+        const SKILLS = [
+            { type: "skill", nickname: "万箭齐发", realname: "万箭齐发", avatarUrl: "", isSpecial: true, rarity: 'legend', className: 'skill-item' },
+            { type: "skill", nickname: "铁索连环", realname: "铁索连环", avatarUrl: "", isSpecial: true, rarity: 'epic', className: 'skill-item' },
+            { type: "skill", nickname: "借刀杀人", realname: "借刀杀人", avatarUrl: "", isSpecial: true, rarity: 'epic', className: 'skill-item' },
+            { type: "skill", nickname: "桃园结义", realname: "桃园结义", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'skill-item' },
+            { type: "skill", nickname: "火爆辣椒", realname: "火爆辣椒", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'skill-item' },
+            { type: "skill", nickname: "下个双倍", realname: "下个双倍", avatarUrl: "", isSpecial: true, rarity: 'legend', className: 'skill-item' },
+        ];
+        
+        const TEACHERS = [
+            { type: "teacher", nickname: "金浪", realname: "金浪", avatarUrl: "", isSpecial: true, rarity: 'legend', className: 'teacher-item' },
+            { type: "teacher", nickname: "刘川", realname: "刘川", avatarUrl: "", isSpecial: true, rarity: 'epic', className: 'teacher-item' },
+            { type: "teacher", nickname: "刘超", realname: "刘超", avatarUrl: "", isSpecial: true, rarity: 'epic', className: 'teacher-item' },
+            { type: "teacher", nickname: "王盼", realname: "王盼", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'teacher-item' },
+            { type: "teacher", nickname: "覃勤", realname: "覃勤", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'teacher-item' },
+            { type: "teacher", nickname: "韦建军", realname: "韦建军", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'teacher-item' },
+            { type: "teacher", nickname: "王俊东", realname: "王俊东", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'teacher-item' },
+        ];
+
+        const startPhrases = [
+            "让我看看谁在紧张", "是谁的小鹿在乱撞", "深呼吸，头晕是正常的",
+            "别躲了，我都看到你了", "此时一名幸运观众汗流浃背", "命运的齿轮开始转动",
+            "只是抽个查，别慌", "眼神别飘，看着我", "准备好你的表演了吗", "让我康康是谁这么幸运"
         ];
         
         const glowClasses = ['glow-rare', 'glow-epic', 'glow-legend'];
@@ -289,116 +532,359 @@
         const btnReveal = document.getElementById('btn-reveal');
         const avatarBox = document.getElementById('avatar-box');
         const avatarImg = document.getElementById('avatar-img');
+        const nonPersonNameDisplay = document.getElementById('non-person-name-display');
+        const btnFilter = document.getElementById('btn-filter');
+        const filterText = document.getElementById('filter-text');
+        const filterMenu = document.getElementById('filter-menu');
+        
+        const baseOptions = document.querySelectorAll('.filter-option.base-option');
+        const bonusOptions = document.querySelectorAll('.filter-option.bonus-option');
 
         let isRolling = false;
         let timer = null;
         let selectedUser = null; 
-        
-        // 【已修改】状态变量：追踪当前显示的是否是真实姓名
         let isRealNameShowing = false; 
+        
+        let currentGroup = '所有人'; 
+        let activeBonuses = [];   
 
-        // --- 3. 核心逻辑 ---
+        let filteredDatabase = []; 
+        let shuffleIndex = 0; 
+        let shuffledList = []; 
+        
+        let nextSelectedUser = null;
 
-        btnMain.addEventListener('click', function() {
-            if (!isRolling) {
-                startRolling();
+        // --- 3. 核心功能函数 ---
+
+        function filterAndShuffleDatabase() {
+            let studentList;
+            if (currentGroup === '所有人') {
+                studentList = [...database];
             } else {
-                stopRolling();
+                studentList = database.filter(user => user.subject === currentGroup);
             }
-        });
 
-        // 【已修改】btnReveal 的事件监听函数：包含动画和切换逻辑
-        btnReveal.addEventListener('click', function() {
-            if (!selectedUser) return;
+            let specialItems = [];
+            if (activeBonuses.includes('技能')) {
+                specialItems = specialItems.concat(SKILLS);
+            }
+            if (activeBonuses.includes('老师')) {
+                specialItems = specialItems.concat(TEACHERS);
+            }
+            
+            if (studentList.length === 0 && specialItems.length > 0) {
+                 filteredDatabase = specialItems;
+            } else if (studentList.length > 0) {
+                filteredDatabase = studentList.concat(specialItems);
+            } else {
+                filteredDatabase = [];
+            }
+            
+            if (filteredDatabase.length === 0) {
+                nameDisplay.innerText = `无数据 (${currentGroup})`;
+                btnMain.disabled = true;
+                return false;
+            }
+            
+            btnMain.disabled = false;
+            
+            shuffledList = [...filteredDatabase]; 
+            for (let i = shuffledList.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1)); 
+                [shuffledList[i], shuffledList[j]] = [shuffledList[j], shuffledList[i]];
+            }
+            
+            shuffleIndex = 0;
+            return true;
+        }
 
-            // 1. 移除可能残留的动画，并触发 "滑出" 动画
-            nameDisplay.classList.remove('slide-in-up'); 
-            nameDisplay.classList.add('slide-out-up');
-
-            // 确定动画结束后的新内容和状态
-            const isNowShowingRealName = !isRealNameShowing;
-            const newText = isNowShowingRealName ? selectedUser.realname : selectedUser.nickname;
-            const newButtonText = isNowShowingRealName ? "显示网名" : "显示原名";
-            const newBgColor = isNowShowingRealName ? "#e0e0e0" : "#f7f7f7";
-            const newBorderColor = isNowShowingRealName ? "#000" : "#eee";
-
-            // 2. 等待滑出动画完成 (0.2秒)，然后更换内容并触发 "滑入"
-            setTimeout(() => {
-                // A. 清理滑出类
-                nameDisplay.classList.remove('slide-out-up');
-
-                // B. 替换内容和样式
-                nameDisplay.innerText = newText;
-                btnReveal.innerText = newButtonText;
-                nameDisplay.style.backgroundColor = newBgColor;
-                nameDisplay.style.borderColor = newBorderColor;
-                isRealNameShowing = isNowShowingRealName; // 更新状态
-
-                // C. 触发滑入动画
-                nameDisplay.classList.add('slide-in-up');
-
-                // 3. 等待滑入动画完成 (0.3秒)，然后清理滑入类
-                setTimeout(() => {
-                    // 移除动画类，让元素回到常规状态
-                    nameDisplay.classList.remove('slide-in-up');
-                }, 300); 
-
-            }, 200); // 必须匹配 slideOutUp 动画的持续时间
-        });
-
+        // 获取下一个结果（逻辑）
+        function getNextShuffledItem() {
+            if (shuffleIndex >= shuffledList.length) {
+                if (!filterAndShuffleDatabase()) {
+                    return null;
+                }
+                console.log("列表已抽完，重新洗牌。");
+            }
+            const item = shuffledList[shuffleIndex];
+            shuffleIndex++; 
+            return item;
+        }
+        
+        // 准备下一次抽取结果并预加载
+        function prepareNextDraw() {
+            nextSelectedUser = getNextShuffledItem();
+            // 如果是学生，提前加载图片
+            if (nextSelectedUser && !nextSelectedUser.isSpecial && nextSelectedUser.avatarUrl) {
+                const img = new Image();
+                img.src = nextSelectedUser.avatarUrl;
+                // 确保图片加载成功，或者至少尝试加载
+                img.onload = () => console.log("已预加载图片:", nextSelectedUser.nickname);
+                img.onerror = () => console.log("预加载图片失败:", nextSelectedUser.nickname);
+            }
+        }
+        
+        // **修改点 2 & 3: 优化动画清除和禁用时间**
         function startRolling() {
+            if (isRolling) return; 
+            
+            // 如果上次抽取的是老师/技能，需要执行消失动画，平滑过渡
+            if (selectedUser && selectedUser.isSpecial) {
+                // 清除特殊动画类，让它通过 opacity transition 消失
+                avatarBox.classList.remove('special-draw-effect');
+                avatarBox.classList.remove('show'); // 依赖 CSS transition 达到淡出效果
+                // 暂时禁用按钮，等待淡出完成
+                btnMain.disabled = true;
+                setTimeout(() => {
+                    // 淡出完成后开始滚动逻辑
+                    if (!nextSelectedUser && !filterAndShuffleDatabase()) {
+                        btnMain.disabled = false;
+                        return; 
+                    }
+                    if (!nextSelectedUser) {
+                        prepareNextDraw();
+                        if(!nextSelectedUser) return;
+                    }
+
+                    doStartRollLogic();
+                }, 300); // 300ms 足够完成 opacity 0.3s ease 的淡出
+            } else {
+                // 如果是学生或者第一次，直接开始
+                if (!nextSelectedUser && !filterAndShuffleDatabase()) {
+                    btnMain.disabled = false;
+                    return; 
+                }
+                if (!nextSelectedUser) {
+                    prepareNextDraw();
+                    if(!nextSelectedUser) return;
+                }
+                doStartRollLogic();
+            }
+        }
+        
+        function doStartRollLogic() {
             isRolling = true;
+            btnMain.disabled = true; 
             btnMain.innerText = "抽取";
             
-            // 清理旧的动画和光效类
+            // 移除上次的 show 类，依赖 transition 淡出
+            avatarBox.classList.remove('show', 'card-animate'); 
+            // 移除上次的特殊类和光效，确保重置
             avatarBox.className = 'avatar-container'; 
-            btnReveal.classList.remove('reveal-show');
-            
-            // 【新增】清理名字框可能残留的动画类
+
+            btnReveal.classList.remove('reveal-show', 'reveal-hidden');
             nameDisplay.classList.remove('slide-out-up', 'slide-in-up');
 
-            // 【已修改】重置原名显示状态和按钮文本
             btnReveal.innerText = "显示原名"; 
             isRealNameShowing = false; 
-            
             nameDisplay.style.backgroundColor = "#f7f7f7";
-            nameDisplay.style.borderColor = "#eee";
+            nameDisplay.style.borderColor = "#f0f0f0";
 
             timer = setInterval(() => {
-                const randomIndex = Math.floor(Math.random() * database.length);
-                nameDisplay.innerText = database[randomIndex].nickname;
+                const randomIndex = Math.floor(Math.random() * filteredDatabase.length);
+                nameDisplay.innerText = filteredDatabase[randomIndex].nickname;
             }, 50); 
+            
+            // **修改点 3: 缩短禁用时间**
+            setTimeout(() => {
+                if (isRolling) { 
+                    btnMain.disabled = false;
+                }
+            }, 300); 
         }
 
         function stopRolling() {
+            if (!isRolling) return; 
+            
             isRolling = false;
+            btnMain.disabled = true; 
             btnMain.innerText = "开始滚动";
             clearInterval(timer);
 
-            const finalIndex = Math.floor(Math.random() * database.length);
-            selectedUser = database[finalIndex];
+            selectedUser = nextSelectedUser;
+            
+            if (!selectedUser) return; 
 
-            // 1. 显示选中的网名
             nameDisplay.innerText = selectedUser.nickname;
 
-            // 2. 设置头像并应用抽卡动画和光效
-            avatarImg.src = selectedUser.avatarUrl;
+            const isSpecialItem = selectedUser.isSpecial;
             
-            const randomGlow = glowClasses[Math.floor(Math.random() * glowClasses.length)];
+            // 重置状态
+            avatarBox.className = 'avatar-container'; 
             
-            avatarBox.classList.add('card-animate');
-            avatarBox.classList.add(randomGlow);
+            // 设置新的内容和动画
+            if (isSpecialItem) {
+                avatarBox.classList.add('hide-img', selectedUser.className);
+                avatarBox.classList.add('no-hover-effect');
+                // 非人物内容
+                nonPersonNameDisplay.innerText = selectedUser.nickname;
+                nonPersonNameDisplay.style.display = 'flex'; 
+                avatarImg.style.display = 'none';
+                
+                btnReveal.classList.add('reveal-hidden');
+                avatarBox.classList.add('special-draw-effect'); // 触发特殊动画
+                
+            } else {
+                // 普通人物头像
+                avatarImg.src = selectedUser.avatarUrl;
+                avatarImg.style.display = 'block'; 
+                nonPersonNameDisplay.style.display = 'none';
+                avatarBox.classList.remove('hide-img', 'skill-item', 'teacher-item', 'no-hover-effect');
 
-            setTimeout(() => {
-                avatarBox.classList.remove('card-animate');
-                avatarBox.classList.add('show');
-            }, 1800);
+                const randomGlow = glowClasses[Math.floor(Math.random() * glowClasses.length)];
+                avatarBox.classList.add('card-animate'); // 触发普通动画
+                avatarBox.classList.add(randomGlow);
 
-            // 3. 显示“显示原名”按钮 (平滑显示)
+                setTimeout(() => {
+                    btnReveal.classList.add('reveal-show');
+                }, 1000); 
+            }
+            
+            // 准备下一次
+            prepareNextDraw();
+
+            const animationDuration = isSpecialItem ? 900 : 1500; // **修改点 3: 缩短动画结束等待时间**
+            
             setTimeout(() => {
-                btnReveal.classList.add('reveal-show'); // 使用 class 实现平滑过渡
-            }, 1000); 
+                // 动画结束清理类并重新启用按钮
+                if (!isSpecialItem) {
+                    avatarBox.classList.remove('card-animate');
+                } else {
+                    avatarBox.classList.remove('special-draw-effect');
+                }
+                avatarBox.classList.add('show'); // 确保非动画状态下也显示
+                btnMain.disabled = false;
+            }, animationDuration);
         }
+        
+        // 名字切换动画
+        function toggleRealName() {
+            if (!selectedUser || selectedUser.isSpecial) return; 
+            
+            isRealNameShowing = !isRealNameShowing;
+
+            nameDisplay.classList.add('slide-out-up');
+
+            setTimeout(() => {
+                nameDisplay.classList.remove('slide-out-up');
+                
+                if (isRealNameShowing) {
+                    nameDisplay.innerText = selectedUser.realname;
+                    btnReveal.innerText = "显示网名";
+                    nameDisplay.style.backgroundColor = "#ffc107"; // 醒目的颜色
+                    nameDisplay.style.borderColor = "#ff9800";
+                } else {
+                    nameDisplay.innerText = selectedUser.nickname;
+                    btnReveal.innerText = "显示原名";
+                    nameDisplay.style.backgroundColor = "#f7f7f7";
+                    nameDisplay.style.borderColor = "#f0f0f0";
+                }
+                
+                nameDisplay.classList.add('slide-in-up');
+            }, 200); 
+        }
+
+        // --- 4. 事件绑定 ---
+
+        btnMain.addEventListener('click', () => {
+            if (isRolling) {
+                stopRolling();
+            } else {
+                startRolling();
+            }
+        });
+
+        btnReveal.addEventListener('click', toggleRealName);
+        avatarBox.addEventListener('click', toggleRealName);
+
+
+        // --- 5. 过滤器逻辑 ---
+
+        // 切换过滤器菜单
+        btnFilter.addEventListener('click', () => {
+            filterMenu.classList.toggle('open');
+            btnFilter.classList.toggle('active');
+        });
+
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', (event) => {
+            if (!filterContainer.contains(event.target) && filterMenu.classList.contains('open')) {
+                filterMenu.classList.remove('open');
+                btnFilter.classList.remove('active');
+            }
+        });
+        
+        // **修改点 1: 切换过滤器时清除头像状态 (使其淡出)**
+        function resetAvatarStateOnFilterChange() {
+            avatarBox.classList.remove('show', 'card-animate', 'special-draw-effect', ...glowClasses, 'skill-item', 'teacher-item');
+            avatarBox.className = 'avatar-container';
+            avatarImg.src = '';
+            nonPersonNameDisplay.style.display = 'none';
+            nameDisplay.innerText = "别紧张";
+            btnReveal.classList.remove('reveal-show');
+            btnReveal.classList.add('reveal-hidden');
+            selectedUser = null;
+            nextSelectedUser = null; 
+            isRealNameShowing = false;
+        }
+
+        // 基本选项（分组）
+        baseOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const newGroup = this.dataset.value;
+                if (currentGroup !== newGroup) {
+                    baseOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    currentGroup = newGroup;
+                    filterText.innerText = newGroup;
+                    resetAvatarStateOnFilterChange(); // **应用修改 1**
+                    filterAndShuffleDatabase();
+                    prepareNextDraw();
+                }
+                filterMenu.classList.remove('open');
+                btnFilter.classList.remove('active');
+            });
+        });
+
+        // 奖励选项（老师/技能）
+        bonusOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const bonusValue = this.dataset.value;
+                const index = activeBonuses.indexOf(bonusValue);
+                if (index > -1) {
+                    activeBonuses.splice(index, 1);
+                    this.classList.remove('selected');
+                } else {
+                    activeBonuses.push(bonusValue);
+                    this.classList.add('selected');
+                }
+                
+                // 更新显示文本
+                let text = currentGroup;
+                if (activeBonuses.length > 0) {
+                    text += ` + ${activeBonuses.join('/')}`;
+                }
+                filterText.innerText = text;
+                resetAvatarStateOnFilterChange(); // **应用修改 1**
+                filterAndShuffleDatabase();
+                prepareNextDraw();
+
+                // 保持菜单打开，直到点击开始或外部
+                // filterMenu.classList.remove('open');
+                // btnFilter.classList.remove('active');
+            });
+        });
+
+        // --- 6. 初始化 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            filterAndShuffleDatabase();
+            prepareNextDraw();
+            
+            // 初始显示一个鼓励语
+            const randomPhrase = startPhrases[Math.floor(Math.random() * startPhrases.length)];
+            nameDisplay.innerText = randomPhrase;
+        });
+
     </script>
 </body>
 </html>
