@@ -132,6 +132,16 @@
             margin: 6px 0;
         }
 
+        .filter-option.instant-option {
+            color: #d32f2f; 
+            font-weight: 600;
+        }
+        .filter-option.instant-option:hover { background-color: #ffebee; }
+        .filter-option.instant-option.selected {
+            background-color: #d32f2f;
+            color: #fff;
+        }
+
         /* --- 头像区域 --- */
         .top-section {
             height: 220px;
@@ -163,7 +173,9 @@
             -webkit-user-select: none;
         }
         
-        /* 学生专用：圆角渐变边框 + 朴素背景光效（使用伪元素实现环形边框，保持圆角贴合） */
+        
+
+        /* --- 学生专属边框 (CSS变量控制颜色) --- */
         .avatar-container.student-border {
             border: none; /* 移除默认实线边框 */
             box-shadow: 0 14px 30px rgba(0,0,0,0.08); /* 基础阴影，和光效叠加 */
@@ -195,7 +207,8 @@
             transform: scale(1) rotate(0deg);
         }
 
-        .avatar-container:hover:not(.no-hover-effect) {
+        /* 确保只有在【没有歪头】且【非特殊物品】时才有 hover 放大效果 */
+        .avatar-container:not(.is-tilted):not(.no-hover-effect):hover {
             transform: rotate(15deg) scale(1.1);
             transition: transform 0.4s ease-in-out;
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
@@ -226,7 +239,6 @@
             word-break: break-word; 
         }
         
-        /* 背景色由动画决定，这里只做兜底 */
         .skill-item .non-person-name { background-color: #ff9800; }
         .teacher-item .non-person-name { background-color: #2196f3; }
         
@@ -291,43 +303,56 @@
         }
 
         /* --- 歪斜/掉钉动画（点击头像触发） --- */
-        .avatar-container.tilt-1 {
-            transform-origin: top left;
-            animation: tilt-1 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-        @keyframes tilt-1 {
-            0% { transform: rotate(0deg) translate(0,0); }
-            60% { transform: rotate(-14deg) translate(-14px, 12px); }
-            100% { transform: rotate(-10deg) translate(-10px, 10px); }
+        /* --- 修复代码开始：头像歪头动画 (QQ弹弹 & 掉落) --- */
+
+        /* 状态标记：当有这个类时，禁用默认的 CSS transition，完全由 animation 接管，防止冲突 */
+        .is-tilted {
+            transition: none !important;
         }
 
-        .avatar-container.tilt-2 {
-            transform-origin: top right;
-            animation: tilt-2 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        /* 动作 1: 左歪 (Q弹效果 - 使用贝塞尔曲线模拟弹簧) */
+        .tilt-left-anim {
+            animation: tilt-bounce-left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-        @keyframes tilt-2 {
-            0% { transform: rotate(0deg) translate(0,0); }
-            60% { transform: rotate(12deg) translate(12px, 10px); }
-            100% { transform: rotate(8deg) translate(8px, 8px); }
-        }
-
-        .avatar-container.tilt-3 {
-            transform-origin: center top;
-            animation: tilt-3 800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-        @keyframes tilt-3 {
-            0% { transform: rotate(0deg) translate(0,0); }
-            50% { transform: rotate(-18deg) translate(-18px, 18px) scale(0.995); }
-            100% { transform: rotate(-12deg) translate(-12px, 14px) scale(0.995); }
+        @keyframes tilt-bounce-left {
+            0% { transform: rotate(0); }
+            40% { transform: rotate(-25deg); } /* 稍微歪过头一点 */
+            100% { transform: rotate(-15deg) translateY(10px); } /* 回弹到最终位置 */
         }
 
-        /* 恢复动画：从当前状态平滑回到默认 */
-        .avatar-container.tilt-recover {
-            animation: tilt-recover 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        /* 动作 2: 右歪 (Q弹效果) */
+        .tilt-right-anim {
+            animation: tilt-bounce-right 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-        @keyframes tilt-recover {
-            to { transform: none; }
+        @keyframes tilt-bounce-right {
+            0% { transform: rotate(0); }
+            40% { transform: rotate(25deg); }
+            100% { transform: rotate(15deg) translateY(10px); }
         }
+
+        /* 动作 3: 震动 + 掉落 (物理重力感) */
+        .tilt-drop-anim {
+            animation: tilt-shock-drop 0.8s ease-out forwards;
+        }
+        @keyframes tilt-shock-drop {
+            0% { transform: translate(0, 0) rotate(0); }
+            10% { transform: translate(-5px, 0) rotate(-2deg); } /* 震动前摇 */
+            20% { transform: translate(5px, 0) rotate(2deg); }
+            30% { transform: translate(0, -15px) scale(1.05); } /* 向上抛起 */
+            60% { transform: translate(0, 40px) rotate(10deg); } /* 重力下落 */
+            80% { transform: translate(0, 35px) rotate(8deg); } /* 落地反弹 */
+            100% { transform: translate(0, 40px) rotate(10deg); } /* 静止 */
+        }
+
+        /* 恢复动画 (丝滑回正) */
+        .tilt-recover-anim {
+            animation: tilt-back-smooth 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes tilt-back-smooth {
+            to { transform: rotate(0) translate(0, 0) scale(1); }
+        }
+
+        /* --- 修复代码结束 --- */
         /* 临时关闭动画/过渡，避免在恢复时重放抽卡动画 */
         .avatar-container.no-anim {
             animation: none !important;
@@ -417,6 +442,35 @@
             transform: none;
             box-shadow: none;
         }
+
+        /* 显示原名按钮 */
+        #btn-reveal {
+            background-color: #fff;
+            color: #000;
+            border: 2px solid #000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(15px);
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            padding: 14px 40px;
+            border-radius: 100px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        #btn-reveal:hover { background-color: #f7f7f7; }
+        .reveal-show {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+        }
+        .reveal-hidden {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none;
+        }
         
         /* --- Footer --- */
         .footer {
@@ -462,6 +516,9 @@
                 
                 <div class="filter-option bonus-option bonus-skill" data-type="bonus" data-value="技能">技能</div>
                 <div class="filter-option bonus-option bonus-teacher" data-type="bonus" data-value="老师">老师</div>
+
+                <div class="filter-separator"></div>
+                <div class="filter-option instant-option" id="btn-instant-mode">⚡ 直接抽取</div>
             </div>
         </div>
         
@@ -482,10 +539,10 @@
     </div>
     
     <div class="footer">
-        <span>Copyright © Tachibana Kousuke 2025</span>
+        <span>Copyright © Takion Kroslin 2026</span>
         <span class="footer-separator">|</span>
         <span class="footer-github">
-            <a href="https://github.com/TachibanaKousuke/Lucky-Draw" target="_blank" title="访问 GitHub 仓库">
+            <a href="https://github.com/TakionKroslin/Lucky-Draw" target="_blank" title="访问 GitHub 仓库">
                 <svg class="github-icon" viewBox="0 0 16 16" version="1.1" aria-hidden="true">
                     <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2h.02c0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
                 </svg>
@@ -509,12 +566,12 @@
             { nickname: "高冷人士没有微信", realname: "高涵予", avatarUrl: "https://api.dicebear.com/7.x/identicon/svg?seed=Felix", subject: "生物" },
             { nickname: "泱泱清潭", realname: "高一淳", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f6.jpg", subject: "生物" },
             { nickname: "萝卜丝比尔", realname: "辜孙雨辰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f9.jpg", subject: "政治" },
-            { nickname: "欧皇知底", realname: "何奕嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328436d1e741a32bf1b993.jpg", subject: "生物" },
+            { nickname: "欧皇知底", realname: "何亦嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328436d1e741a32bf1b993.jpg", subject: "生物" },
             { nickname: "千", realname: "韩铭杰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f7.jpg", subject: "生物" },
             { nickname: "步法鹅", realname: "衡星玙", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f5.jpg", subject: "生物" },
-            { nickname: "PhuDgue", realname: "胡铸", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba05.jpg", subject: "生物" },
+            { nickname: "情商巅峰时期", realname: "胡铸", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba05.jpg", subject: "生物" },
             { nickname: "黄小妹", realname: "黄彦洁", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba02.jpg", subject: "生物" },
-            { nickname: "无恙.", realname: "李安然", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba01.jpg", subject: "生物" },
+            { nickname: "无恙.", realname: "李安然", avatarUrl: "https://pic1.imgdb.cn/item/694fe8e5161224305eb30b3e.jpg", subject: "生物" },
             { nickname: "Touma Kazusa", realname: "李柯锦", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba03.jpg", subject: "生物" },
             { nickname: "Camilla", realname: "李林蔚", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba04.jpg", subject: "生物" },
             { nickname: "Eschatology", realname: "廖家嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba10.jpg", subject: "生物" },
@@ -529,7 +586,7 @@
             { nickname: "一北极光", realname: "王懿", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1c.jpg", subject: "生物" },
             { nickname: "q7l12", realname: "王颖萱", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1d.jpg", subject: "生物" },
             { nickname: "Hello", realname: "王赞杰", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba23.jpg", subject: "生物" },
-            { nickname: "Tachibana Kousuke", realname: "韦景皓", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba21.jpg", subject: "生物" },
+            { nickname: "Takion Kroslin", realname: "韦景皓", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba21.jpg", subject: "生物" },
             { nickname: "Anonymous", realname: "魏熙芮", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba25.jpg", subject: "生物" },
             { nickname: "文三", realname: "文思睿", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba22.jpg", subject: "生物" },
             { nickname: "WCSDM", realname: "吴向玉", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98f.jpg", subject: "生物" },
@@ -551,68 +608,23 @@
         ];
         
         const SKILLS = [
-            { type: "skill", nickname: "万箭齐发", realname: "万箭齐发", avatarUrl: "", isSpecial: true, rarity: 'legend', className: 'skill-item' },
-            { type: "skill", nickname: "铁索连环", realname: "铁索连环", avatarUrl: "", isSpecial: true, rarity: 'epic', className: 'skill-item' },
-            { type: "skill", nickname: "借刀杀人", realname: "借刀杀人", avatarUrl: "", isSpecial: true, rarity: 'epic', className: 'skill-item' },
-            { type: "skill", nickname: "桃园结义", realname: "桃园结义", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'skill-item' },
-            { type: "skill", nickname: "火爆辣椒", realname: "火爆辣椒", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'skill-item' },
-            { type: "skill", nickname: "下个双倍", realname: "下个双倍", avatarUrl: "", isSpecial: true, rarity: 'legend', className: 'skill-item' },
+            { type: "skill", nickname: "万箭齐发", realname: "万箭齐发", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'legend', className: 'skill-item' },
+            { type: "skill", nickname: "铁索连环", realname: "铁索连环", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'epic', className: 'skill-item' },
+            { type: "skill", nickname: "借刀杀人", realname: "借刀杀人", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'epic', className: 'skill-item' },
+            { type: "skill", nickname: "桃园结义", realname: "桃园结义", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'rare', className: 'skill-item' },
+            { type: "skill", nickname: "火爆辣椒", realname: "火爆辣椒", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'rare', className: 'skill-item' },
+            { type: "skill", nickname: "下个双倍", realname: "下个双倍", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'legend', className: 'skill-item' },
         ];
         
         const TEACHERS = [
-            { type: "teacher", nickname: "金浪", realname: "金浪", avatarUrl: "", isSpecial: true, rarity: 'legend', className: 'teacher-item' },
-            { type: "teacher", nickname: "刘川", realname: "刘川", avatarUrl: "", isSpecial: true, rarity: 'legend', className: 'teacher-item' },
-            { type: "teacher", nickname: "刘超", realname: "刘超", avatarUrl: "", isSpecial: true, rarity: 'legend', className: 'teacher-item' },
-            { type: "teacher", nickname: "王盼", realname: "王盼", avatarUrl: "", isSpecial: true, rarity: 'epic', className: 'teacher-item' },
-            { type: "teacher", nickname: "覃勤", realname: "覃勤", avatarUrl: "", isSpecial: true, rarity: 'epic', className: 'teacher-item' },
-            { type: "teacher", nickname: "韦建军", realname: "韦建军", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'teacher-item' },
-            { type: "teacher", nickname: "王俊东", realname: "王俊东", avatarUrl: "", isSpecial: true, rarity: 'rare', className: 'teacher-item' },
+            { type: "teacher", nickname: "90后金浪", realname: "金浪", avatarUrl: "https://pic1.imgdb.cn/item/6946ad3c29a616e528622640.png", hasAvatar: true, isSpecial: true, rarity: 'legend', className: 'teacher-item' },
+            { type: "teacher", nickname: "风清扬", realname: "刘川", avatarUrl: "https://pic1.imgdb.cn/item/694fea95161224305eb30b63.jpg", hasAvatar: true, isSpecial: true, rarity: 'epic', className: 'teacher-item' },
+            { type: "teacher", nickname: "刘超", realname: "刘超", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'epic', className: 'teacher-item' },
+            { type: "teacher", nickname: "王盼", realname: "王盼", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'rare', className: 'teacher-item' },
+            { type: "teacher", nickname: "覃勤", realname: "覃勤", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'rare', className: 'teacher-item' },
+            { type: "teacher", nickname: "韦建军", realname: "韦建军", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'rare', className: 'teacher-item' },
+            { type: "teacher", nickname: "王俊东", realname: "王俊东", avatarUrl: "", hasAvatar: false, isSpecial: true, rarity: 'rare', className: 'teacher-item' },
         ];
-
-        // 学生边框备选颜色对（渐变起止色），审美优先，取 10 组
-        const STUDENT_BORDER_PAIRS = [
-            ['#ff8a65', '#ff7043'],
-            ['#42a5f5', '#7e57c2'],
-            ['#26a69a', '#66bb6a'],
-            ['#ffb74d', '#ff8a65'],
-            ['#29b6f6', '#26c6da'],
-            ['#ab47bc', '#8e24aa'],
-            ['#7e57c2', '#5c6bc0'],
-            ['#ef5350', '#ec407a'],
-            ['#66bb6a', '#9ccc65'],
-            ['#ffd54f', '#ffb74d']
-        ];
-
-        function hexToRgba(hex, alpha) {
-            if (!hex) return `rgba(0,0,0,${alpha})`;
-            const h = hex.replace('#', '');
-            const bigint = parseInt(h, 16);
-            const r = (bigint >> 16) & 255;
-            const g = (bigint >> 8) & 255;
-            const b = bigint & 255;
-            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-        }
-
-        // 应用学生圆角渐变边框（使用 CSS 变量与 .student-border 伪元素）
-        function applyStudentBorder(el) {
-            const pair = STUDENT_BORDER_PAIRS[Math.floor(Math.random() * STUDENT_BORDER_PAIRS.length)];
-            const c1 = pair[0];
-            const c2 = pair[1];
-            el.style.setProperty('--c1', c1);
-            el.style.setProperty('--c2', c2);
-            // 朴素 glow 使用渐变终色的半透明作为投影颜色
-            const glow = hexToRgba(c2, 0.16);
-            el.style.setProperty('--glow', glow);
-            el.classList.add('student-border', 'glow');
-        }
-
-        function clearStudentBorder(el) {
-            el.classList.remove('student-border', 'glow');
-            el.style.removeProperty('--c1');
-            el.style.removeProperty('--c2');
-            el.style.removeProperty('--glow');
-            // 恢复默认边框由 CSS 管控（.avatar-container 有默认 border 样式）
-        }
 
         const startPhrases = [
             "让我看看谁在紧张", "是谁的小鹿在乱撞", "深呼吸，头晕是正常的",
@@ -629,6 +641,7 @@
         const btnFilter = document.getElementById('btn-filter');
         const filterText = document.getElementById('filter-text');
         const filterMenu = document.getElementById('filter-menu');
+        const btnInstantMode = document.getElementById('btn-instant-mode');
         
         const baseOptions = document.querySelectorAll('.filter-option.base-option');
         const bonusOptions = document.querySelectorAll('.filter-option.bonus-option');
@@ -640,6 +653,7 @@
         
         let currentGroup = '所有人'; 
         let activeBonuses = [];      
+        let isInstantMode = false;
 
         let filteredDatabase = []; 
         let shuffleIndex = 0; 
@@ -648,6 +662,22 @@
         let nextSelectedUser = null;
 
         // --- 3. 核心功能函数 ---
+
+        // 辅助函数：为学生头像生成随机渐变色
+        function setStudentColors() {
+            // 定义几组好看的渐变配色
+            const gradients = [
+                ['#42a5f5', '#7e57c2'], // 蓝紫
+                ['#ff7043', '#ffca28'], // 橙黄
+                ['#26a69a', '#66bb6a'], // 青绿
+                ['#ec407a', '#ab47bc'], // 粉紫
+                ['#5c6bc0', '#29b6f6']  // 靛蓝
+            ];
+            const rand = gradients[Math.floor(Math.random() * gradients.length)];
+            avatarBox.style.setProperty('--c1', rand[0]);
+            avatarBox.style.setProperty('--c2', rand[1]);
+            avatarBox.style.setProperty('--glow', rand[0] + '33'); // 20%透明度
+        }
 
         function filterAndShuffleDatabase() {
             let studentList;
@@ -705,24 +735,45 @@
         
         function prepareNextDraw() {
             nextSelectedUser = getNextShuffledItem();
-            if (nextSelectedUser && nextSelectedUser.avatarUrl && nextSelectedUser.avatarUrl !== "") {
-                const img = new Image();
-                img.src = nextSelectedUser.avatarUrl;
+            if (nextSelectedUser) {
+                const shouldUseAvatar = !nextSelectedUser.isSpecial || nextSelectedUser.hasAvatar === true;
+                if (shouldUseAvatar && nextSelectedUser.avatarUrl) {
+                    const img = new Image();
+                    img.src = nextSelectedUser.avatarUrl;
+                }
             }
         }
         
+        
         function startRolling() {
             if (isRolling) return; 
-            
-            // 开始前，清除所有特殊动画类
-            avatarBox.classList.remove('anim-legend', 'anim-epic', 'anim-rare', 'card-animate', 'special-draw-effect');
+            // 如果是直接抽取模式
+            if (isInstantMode) {
+                // 如果当前处于歪头状态，先清除，但不做动画，直接消失
+                if (isTilted()) {
+                    avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim', 'is-tilted');
+                }
+
+                // 执行收缩吸入隐藏上一个头像
+                triggerShrinkHide();
+                btnMain.disabled = true;
+
+                setTimeout(() => {
+                    handleInstantDraw();
+                }, 500); // 等待吸入动画完成
+                return;
+            }
+
+            // 普通滚动模式
+            // 每次开始前，清理所有特殊状态和动画
+            avatarBox.classList.remove('anim-legend', 'anim-epic', 'anim-rare', 'card-animate', 
+                                       'tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim', 'is-tilted');
             // 清理任何之前通过 JS 设置的自定义样式（边框/光效）
-            clearStudentBorder(avatarBox);
-            // 确保动画已启用，然后触发收缩吸入隐藏上一个头像
+            // 然后触发收缩吸入隐藏上一个头像
             triggerShrinkHide();
             btnMain.disabled = true;
 
-            // 等待消失动画(500ms)的一半左右开始数据滚动
+            // 等待消失动画(300-500ms)后开始滚动名字
             setTimeout(() => {
                 if (!nextSelectedUser && !filterAndShuffleDatabase()) {
                     btnMain.disabled = false;
@@ -736,12 +787,28 @@
             }, 300);
         }
         
+        function handleInstantDraw() {
+            btnMain.disabled = true;
+            
+            // 准备数据
+            if (!nextSelectedUser && !filterAndShuffleDatabase()) {
+                btnMain.disabled = false;
+                return;
+            }
+            if (!nextSelectedUser) prepareNextDraw();
+            selectedUser = nextSelectedUser;
+            
+            // 直接显示结果
+            renderResult(selectedUser);
+            
+            prepareNextDraw();
+        }
+        
         function doStartRollLogic() {
             isRolling = true;
             btnMain.disabled = true; 
-            btnMain.innerText = "抽取";
+            btnMain.innerText = "抽取"; 
             
-            // 确保容器此时是隐藏的
             avatarBox.classList.remove('show'); 
             
             // 重置状态
@@ -771,74 +838,145 @@
             clearInterval(timer);
 
             selectedUser = nextSelectedUser;
+            renderResult(selectedUser);
             prepareNextDraw(); 
-            
-            if (!selectedUser) return; 
+        }
 
-            nameDisplay.innerText = selectedUser.nickname;
+        function renderResult(user) {
+            if (!user) return;
 
-            const isSpecialItem = selectedUser.isSpecial;
-            const hasAvatar = selectedUser.avatarUrl && selectedUser.avatarUrl !== "";
-            const rarity = selectedUser.rarity || 'rare'; 
+            nameDisplay.innerText = user.nickname;
+
+            const isSpecialItem = user.isSpecial;
+            const hasAvatar = user.hasAvatar === true; 
+            const rarity = user.rarity || 'rare'; 
 
             // 重置基础类
             avatarBox.className = 'avatar-container'; 
-            // 默认清理之前的 JS 样式（特殊物品会使用 CSS 覆盖）
-            clearStudentBorder(avatarBox);
-
-            // 决定显示内容
+            
+            // 1. 设置内容模式 (图片 vs 文字)
             if (isSpecialItem && !hasAvatar) {
                 // 特殊物品无头像 -> 纯文字
-                avatarBox.classList.add('hide-img', selectedUser.className || 'skill-item');
+                avatarBox.classList.add('hide-img', user.className || 'skill-item');
+                // 特殊物品无头像时也不用Hover放大
                 avatarBox.classList.add('no-hover-effect');
-                nonPersonNameDisplay.innerText = selectedUser.nickname;
+                nonPersonNameDisplay.innerText = user.nickname;
                 nonPersonNameDisplay.style.display = 'flex'; 
                 avatarImg.style.display = 'none';
+                
+                // 移除学生边框，防止颜色残留
+                avatarBox.classList.remove('student-border', 'glow');
+                avatarBox.style.removeProperty('--c1');
+                avatarBox.style.removeProperty('--c2');
+                avatarBox.style.removeProperty('--glow');
             } else {
                 // 学生 或 有头像的老师 -> 图片
-                avatarImg.src = selectedUser.avatarUrl;
+                avatarImg.src = user.avatarUrl;
                 avatarImg.style.display = 'block'; 
                 nonPersonNameDisplay.style.display = 'none';
                 avatarBox.classList.remove('hide-img', 'skill-item', 'teacher-item', 'no-hover-effect');
+                
+                // 如果是学生(非特殊)，应用学生专属边框和随机颜色
+                if (!isSpecialItem) {
+                    avatarBox.classList.add('student-border', 'glow');
+                    setStudentColors();
+                } else {
+                    // 有头像的特殊角色(老师)，清除学生边框
+                    avatarBox.classList.remove('student-border', 'glow');
+                }
             }
 
-            // 应用动画类
-            let animClass = 'card-animate'; // 默认学生
+            // 2. 应用入场动画类
+            let animClass = 'card-animate'; // 默认学生: 经典翻转
             if (isSpecialItem) {
                 if (rarity === 'legend') animClass = 'anim-legend';
                 else if (rarity === 'epic') animClass = 'anim-epic';
                 else animClass = 'anim-rare';
             }
-            // 学生（非特殊）需随机渐变边框 + 朴素光效
-            if (!isSpecialItem) {
-                applyStudentBorder(avatarBox);
-            } else {
-                // 特殊物品使用 CSS 样式，这里清理掉 JS 样式，保证 CSS !important 生效
-                clearStudentBorder(avatarBox);
-            }
-
-            // 强制重绘并添加动画类
-            void avatarBox.offsetWidth;
+            
+            void avatarBox.offsetWidth; // 强制重绘
             avatarBox.classList.add(animClass);
 
             // 动画时长控制
-            // Legend/Epic 稍微长一点
             const animationDuration = isSpecialItem ? 1300 : 1800;
             
-            // 动画结束，保持最终状态
             setTimeout(() => {
                 avatarBox.classList.add('show'); 
                 btnMain.disabled = false;
+                if (isInstantMode) {
+                    btnMain.innerText = "点击抽取";
+                } else {
+                    btnMain.innerText = "开始滚动";
+                }
             }, animationDuration);
         }
 
+        // --- 修复代码开始：JS 歪头控制逻辑 ---
+
+        // 1. 判断当前头像是否处于歪掉的状态
+        function isTilted() {
+            return avatarBox.classList.contains('tilt-left-anim') ||
+                   avatarBox.classList.contains('tilt-right-anim') ||
+                   avatarBox.classList.contains('tilt-drop-anim');
+        }
+
+        // 2. 应用随机歪头动画
+        function applyRandomTilt() {
+            // 移除可能存在的恢复动画
+            avatarBox.classList.remove('tilt-recover-anim');
+            // 添加标记，用于 CSS 中禁用 hover 效果
+            avatarBox.classList.add('is-tilted');
+            
+            const r = Math.random();
+            if (r < 0.33) {
+                avatarBox.classList.add('tilt-left-anim');
+            } else if (r < 0.66) {
+                avatarBox.classList.add('tilt-right-anim');
+            } else {
+                avatarBox.classList.add('tilt-drop-anim');
+            }
+        }
+
+        // 3. 恢复正常位置 (带动画)
+        function restoreTilt() {
+            if (!isTilted()) return;
+            
+            // 移除所有歪头动画类
+            avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim');
+            
+            // 触发恢复动画：先移除类，强制回流(reflow)，再添加类
+            avatarBox.classList.remove('tilt-recover-anim');
+            void avatarBox.offsetWidth; // 关键：强制浏览器重绘，确保动画重新触发
+            avatarBox.classList.add('tilt-recover-anim');
+            
+            function onEnd(e) {
+                if (e.animationName === 'tilt-back-smooth') {
+                    avatarBox.classList.remove('tilt-recover-anim');
+                    avatarBox.removeEventListener('animationend', onEnd);
+                }
+            }
+            avatarBox.addEventListener('animationend', onEnd);
+
+            // 移除标记，恢复 Hover 效果
+            avatarBox.classList.remove('is-tilted');
+        }
+
+        // 4. 修改点击头像的逻辑 (toggleRealName)
         function toggleRealName() {
             if (!selectedUser) return;
-            // 老师/技能 允许切换名字，但通常他们真名=网名，逻辑上兼容
             
+            // 【修复逻辑】：如果已经在歪头状态，点击则复位，不再切换名字
+            if (isTilted()) {
+                restoreTilt();
+                return; 
+            }
+
+            // 如果没有歪头，执行：切换名字 + 随机歪头
+            applyRandomTilt(); 
+
+            // 下面是原有的切换名字动画逻辑
             nameDisplay.classList.remove('slide-in-up', 'slide-out-up');
-            void nameDisplay.offsetWidth; // 强制回流
-            
+            void nameDisplay.offsetWidth; 
             nameDisplay.classList.add('slide-out-up');
 
             setTimeout(() => {
@@ -846,19 +984,18 @@
                 
                 if (isRealNameShowing) {
                     nameDisplay.innerText = selectedUser.realname;
-                    // 只有真名变色
                     nameDisplay.style.backgroundColor = "#f7f7f7"; 
-                    nameDisplay.style.borderColor = "#f0f0f0";
                 } else {
                     nameDisplay.innerText = selectedUser.nickname;
                     nameDisplay.style.backgroundColor = "#f7f7f7";
-                    nameDisplay.style.borderColor = "#f0f0f0";
                 }
                 
                 nameDisplay.classList.remove('slide-out-up');
                 nameDisplay.classList.add('slide-in-up');
             }, 200);
         }
+
+        // --- 修复代码结束 ---
 
         function updateFilterButtonText() {
             let text = currentGroup;
@@ -867,8 +1004,6 @@
             }
             filterText.innerText = text;
         }
-
-        // --- 4. 事件监听器 ---
 
         // Helper: reliably perform shrink-hide animation starting from visible state
         function triggerShrinkHide() {
@@ -892,74 +1027,71 @@
             }, 520);
         }
 
-        btnMain.addEventListener('click', () => {
-            if (isRolling) stopRolling();
-            else startRolling();
-        });
+        // --- 4. 事件监听器 ---
 
-        // 点击头像：始终切换名字；如果当前歪斜则同时恢复，否则施加随机歪斜
-        avatarBox.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // 始终切换名字
-            toggleRealName();
-            // 若已歪斜 -> 恢复；否则施加随机歪斜
-            if (isTilted()) {
-                restoreTilt();
+        btnMain.addEventListener('click', () => {
+            if (isInstantMode) {
+                startRolling(); 
             } else {
-                applyRandomTilt();
+                if (isRolling) stopRolling();
+                else startRolling();
             }
         });
 
-        // 过滤器逻辑
+        // 2. 空格键控制
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault(); 
+                if (btnMain.disabled) return; 
+                btnMain.click();
+            }
+        });
+
+        // 点击头像切换名字
+        avatarBox.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            toggleRealName(); 
+        });
+
+        // 修复：点击空白处复位
+        document.addEventListener('click', (e) => {
+            if (!btnFilter.contains(e.target) && !filterMenu.contains(e.target)) {
+                 if(filterMenu.classList.contains('open')) {
+                    filterMenu.classList.remove('open');
+                    btnFilter.classList.remove('active');
+                 }
+            }
+            
+            if (!avatarBox.contains(e.target) && isTilted()) {
+                restoreTilt();
+            }
+        });
+
         btnFilter.addEventListener('click', (e) => {
             e.stopPropagation(); 
             filterMenu.classList.toggle('open');
             btnFilter.classList.toggle('active');
-        });
-
-        // 全局点击关闭菜单
-        document.addEventListener('click', (e) => {
-            if (!btnFilter.contains(e.target) && filterMenu.classList.contains('open')) {
-                filterMenu.classList.remove('open');
-                btnFilter.classList.remove('active');
-            }
         });
         
         filterMenu.addEventListener('click', (e) => {
              e.stopPropagation();
         });
 
-        // 点击空白处时若容器处于歪斜状态则恢复（并同时关闭 filter 菜单）
-        document.addEventListener('click', (e) => {
-            if (!btnFilter.contains(e.target) && filterMenu.classList.contains('open')) {
-                filterMenu.classList.remove('open');
-                btnFilter.classList.remove('active');
-            }
-            if (!avatarBox.contains(e.target) && isTilted()) {
-                restoreTilt();
-            }
-        });
-
-        // pointerdown 版本：更早响应，以防某些环境下 click 被阻塞或延迟
-        document.addEventListener('pointerdown', (e) => {
-            if (!avatarBox.contains(e.target) && isTilted()) {
-                restoreTilt();
-            }
-        });
-
-        // 选项点击逻辑
         function handleFilterChange() {
-            // 1. 使用收缩吸入动画隐藏当前头像（与 startRolling 行为一致）
-            triggerShrinkHide();
-
-            // 2. 等待消失动画结束后更新数据
+            // 修复逻辑：切换选科时，先执行吸入消失动画
+            avatarBox.classList.remove('show');
+            // 清除歪头状态
+            if (isTilted()) {
+                avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim', 'is-tilted');
+            }
+            
             setTimeout(() => {
                 updateFilterButtonText();
                 filterAndShuffleDatabase();
                 prepareNextDraw();
                 nameDisplay.innerText = startPhrases[Math.floor(Math.random() * startPhrases.length)];
-                // 此时 avatarBox 依然是隐藏的(opacity:0)，等待下次抽取显示
-            }, 500); // 匹配 CSS transition 0.5s
+                selectedUser = null;
+            }, 500); 
         }
 
         baseOptions.forEach(option => {
@@ -990,50 +1122,28 @@
             });
         });
 
+        // 3. 直接抽取模式切换
+        btnInstantMode.addEventListener('click', () => {
+            isInstantMode = !isInstantMode;
+            btnInstantMode.classList.toggle('selected');
+            
+            if (isInstantMode) {
+                btnMain.innerText = "点击抽取";
+            } else {
+                btnMain.innerText = "开始滚动";
+            }
+            
+            filterMenu.classList.remove('open');
+            btnFilter.classList.remove('active');
+        });
+
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             filterAndShuffleDatabase();
             prepareNextDraw();
             updateFilterButtonText();
             nameDisplay.innerText = startPhrases[Math.floor(Math.random() * startPhrases.length)];
-            // 初始状态：头像框隐藏，等待抽取
         });
-
-        // --- 歪斜（掉钉）控制函数 ---
-        function isTilted() {
-            return avatarBox.classList.contains('tilt-1') || avatarBox.classList.contains('tilt-2') || avatarBox.classList.contains('tilt-3');
-        }
-
-        function applyRandomTilt() {
-            // 先移除恢复类，防止冲突
-            avatarBox.classList.remove('tilt-recover');
-            const idx = Math.floor(Math.random() * 3) + 1;
-            avatarBox.classList.remove('tilt-1', 'tilt-2', 'tilt-3');
-            avatarBox.classList.add(`tilt-${idx}`);
-        }
-
-        function restoreTilt() {
-            if (!isTilted()) return;
-            // 移除可能会导致恢复时重放的抽卡动画类（保证恢复时保持静止）
-            const animClasses = ['card-animate', 'anim-legend', 'anim-epic', 'anim-rare', 'special-draw-effect'];
-            animClasses.forEach(c => avatarBox.classList.remove(c));
-
-            // 移除 tilt 状态并添加恢复动画类，平滑回到原位
-            avatarBox.classList.remove('tilt-1', 'tilt-2', 'tilt-3');
-            // 触发恢复动画
-            avatarBox.classList.remove('tilt-recover');
-            // 强制回流，确保动画可以重新触发
-            void avatarBox.offsetWidth;
-            avatarBox.classList.add('tilt-recover');
-
-            function onEnd(e) {
-                if (e.animationName === 'tilt-recover') {
-                    avatarBox.classList.remove('tilt-recover');
-                    avatarBox.removeEventListener('animationend', onEnd);
-                }
-            }
-            avatarBox.addEventListener('animationend', onEnd);
-        }
 
     </script>
 </body>
