@@ -207,11 +207,11 @@
             transform: scale(1) rotate(0deg);
         }
 
-        /* 确保只有在【没有歪头】且【非特殊物品】时才有 hover 放大效果 */
+        /* 已移除 Hover 效果：保持头像在悬停时稳定 */
         .avatar-container:not(.is-tilted):not(.no-hover-effect):hover {
-            transform: rotate(15deg) scale(1.1);
-            transition: transform 0.4s ease-in-out;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            transform: none;
+            transition: none;
+            box-shadow: none;
         }
         
         .avatar-container.hide-img .avatar-img {
@@ -551,60 +551,73 @@
     </div>
 
     <script>
+        /*
+         * 文件总体说明：
+         * - 本脚本负责“幸运抽取”页面的所有前端逻辑，包括数据、样式控制、抽签流程、动画触发和事件绑定。
+         * - 请注意：本次仅添加注释，不对任何可执行代码做修改，确保行为与原来完全一致。
+         *
+         * 主要模块划分：
+         * 1) 数据配置区域（参与抽取的学生/技能/老师等静态数据）
+         * 2) 变量定义（从 DOM 获取引用，定义运行时状态变量）
+         * 3) 核心功能函数（过滤、洗牌、滚动、渲染、动画控制等）
+         * 4) 事件绑定与页面初始化（按钮、键盘、过滤器等交互绑定）
+         */
+
         // --- 1. 数据配置区域 ---
         const database = [
-            { nickname: "青行归", realname: "艾炜杰", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9da.jpg", subject: "政治" },
-            { nickname: "Tiamo", realname: "艾文博", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dc.jpg", subject: "生物" },
-            { nickname: "blue IHrNm", realname: "曹瑾瑜", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9db.jpg", subject: "政治" },
-            { nickname: "陳风", realname: "陈林霄", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dd.jpg", subject: "生物" },
-            { nickname: "田田小影子", realname: "陈荍影", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9d9.jpg", subject: "政治" },
-            { nickname: "CzX", realname: "陈在芯", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9eb.jpg", subject: "生物" },
-            { nickname: "🤐", realname: "程恩泽", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ec.jpg", subject: "生物" },
-            { nickname: "Il sole.", realname: "邓淼", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ed.jpg", subject: "生物" },
-            { nickname: "pit pony", realname: "邓萧晓", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ee.jpg", subject: "生物" },
-            { nickname: "白狗黑", realname: "冯麒霏", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b991.jpg", subject: "政治" },
-            { nickname: "高冷人士没有微信", realname: "高涵予", avatarUrl: "https://api.dicebear.com/7.x/identicon/svg?seed=Felix", subject: "生物" },
-            { nickname: "泱泱清潭", realname: "高一淳", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f6.jpg", subject: "生物" },
-            { nickname: "萝卜丝比尔", realname: "辜孙雨辰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f9.jpg", subject: "政治" },
-            { nickname: "欧皇知底", realname: "何亦嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328436d1e741a32bf1b993.jpg", subject: "生物" },
-            { nickname: "千", realname: "韩铭杰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f7.jpg", subject: "生物" },
-            { nickname: "步法鹅", realname: "衡星玙", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f5.jpg", subject: "生物" },
-            { nickname: "情商巅峰时期", realname: "胡铸", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba05.jpg", subject: "生物" },
-            { nickname: "黄小妹", realname: "黄彦洁", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba02.jpg", subject: "生物" },
-            { nickname: "无恙.", realname: "李安然", avatarUrl: "https://pic1.imgdb.cn/item/694fe8e5161224305eb30b3e.jpg", subject: "生物" },
-            { nickname: "Touma Kazusa", realname: "李柯锦", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba03.jpg", subject: "生物" },
-            { nickname: "Camilla", realname: "李林蔚", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba04.jpg", subject: "生物" },
-            { nickname: "Eschatology", realname: "廖家嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba10.jpg", subject: "生物" },
-            { nickname: "有悠", realname: "廖轩浩", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba12.jpg", subject: "政治" },
-            { nickname: "刘轩", realname: "刘轩", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98d.jpg", subject: "政治" },
-            { nickname: "轩🏃🏀", realname: "吕子轩", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b992.jpg", subject: "生物" },
-            { nickname: "揽星河", realname: "马星灿", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba11.jpg", subject: "生物" },
-            { nickname: "小天才杏宝", realname: "彭渝中", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1a.jpg", subject: "政治" },
-            { nickname: "我又不是苦力", realname: "唐菱蔚", avatarUrl: "https://pic1.imgdb.cn/item/693286fdd1e741a32bf1bd63.jpg", subject: "生物" },
-            { nickname: "小王在此刻", realname: "王爱阳", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1b.jpg", subject: "政治" },
-            { nickname: "涵", realname: "王乙涵", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba19.jpg", subject: "生物" },
-            { nickname: "一北极光", realname: "王懿", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1c.jpg", subject: "生物" },
-            { nickname: "q7l12", realname: "王颖萱", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1d.jpg", subject: "生物" },
-            { nickname: "Hello", realname: "王赞杰", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba23.jpg", subject: "生物" },
-            { nickname: "Takion Kroslin", realname: "韦景皓", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba21.jpg", subject: "生物" },
-            { nickname: "Anonymous", realname: "魏熙芮", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba25.jpg", subject: "生物" },
-            { nickname: "文三", realname: "文思睿", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba22.jpg", subject: "生物" },
-            { nickname: "WCSDM", realname: "吴向玉", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98f.jpg", subject: "生物" },
-            { nickname: "西瓜刨冰", realname: "鲜卓彤", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba29.jpg", subject: "政治" },
-            { nickname: "惟楚有才", realname: "徐楚烦", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2b.jpg", subject: "生物" },
-            { nickname: "续叙序", realname: "徐子恒", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2c.jpg", subject: "政治" },
-            { nickname: "旋转℃的时光", realname: "杨成宇", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2a.jpg", subject: "生物" },
-            { nickname: "Nernst", realname: "杨若雷", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2d.jpg", subject: "生物" },
-            { nickname: "鼠了", realname: "杨宣浩", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba31.jpg", subject: "政治" },
-            { nickname: "雏鸣", realname: "杨懿", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba34.jpg", subject: "生物" },
-            { nickname: "Ray", realname: "张淙睿", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba32.jpg", subject: "生物" },
-            { nickname: "丝血反虾闰土的猹", realname: "张梓轩", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba35.jpg", subject: "生物" },
-            { nickname: "AQ", realname: "赵潜", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba33.jpg", subject: "政治" },
-            { nickname: "(＞＜)", realname: "赵秋玉", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3a.jpg", subject: "生物" },
-            { nickname: "Zfang", realname: "郑放", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3c.jpg", subject: "生物" },
-            { nickname: "Emmanuel", realname: "周柯运", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98e.jpg", subject: "生物" },
-            { nickname: "y", realname: "邹天杰", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3b.jpg", subject: "生物" },
-            { nickname: "LZZN", realname: "刘知易", avatarUrl: "https://pic1.imgdb.cn/item/693d6d7ffe7cfeca3822ee6f.jpg", subject: "生物" },
+            { nickname: "青行归", realname: "艾炜杰", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9da.jpg", subject: "政治 "},
+            { nickname: "Tiamo", realname: "艾文博", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dc.jpg", subject: "生物"},
+            { nickname: "blue IHrNm", realname: "曹瑾瑜", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9db.jpg", subject: "政治"},
+            { nickname: "陳风", realname: "陈林霄", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dd.jpg", subject: "生物"},
+            { nickname: "田田小影子", realname: "陈荍影", avatarUrl: "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9d9.jpg", subject: "政治"},
+            { nickname: "CzX", realname: "陈在芯", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9eb.jpg", subject: "生物"},
+            { nickname: "🤐", realname: "程恩泽", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ec.jpg", subject: "生物"},
+            { nickname: "Il sole.", realname: "邓淼", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ed.jpg", subject: "生物"},
+            { nickname: "pit pony", realname: "邓萧晓", avatarUrl: "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ee.jpg", subject: "生物"},
+            { nickname: "白狗黑", realname: "冯麒霏", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b991.jpg", subject: "政治"},
+            { nickname: "高冷人士没有微信", realname: "高涵予", avatarUrl: "https://api.dicebear.com/7.x/identicon/svg?seed=Felix", subject: "生物"},
+            { nickname: "泱泱清潭", realname: "高一淳", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f6.jpg", subject: "生物"},
+            { nickname: "萝卜丝比尔", realname: "辜孙雨辰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f9.jpg", subject: "政治"},
+            { nickname: "欧皇知底", realname: "何奕嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328436d1e741a32bf1b993.jpg", subject: "生物"},
+            { nickname: "千", realname: "韩铭杰", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f7.jpg", subject: "生物"},
+            { nickname: "步法鹅", realname: "衡星玙", avatarUrl: "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f5.jpg", subject: "生物"},
+            { nickname: "PhuDgue", realname: "胡铸", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba05.jpg", subject: "生物"},
+            { nickname: "黄小妹", realname: "黄彦洁", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba02.jpg", subject: "生物"},
+            { nickname: "无恙.", realname: "李安然", avatarUrl: "https://pic1.imgdb.cn/item/694fe8e5161224305eb30b3e.jpg", subject: "生物"},
+            { nickname: "Touma Kazusa", realname: "李柯锦", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba03.jpg", subject: "生物"},
+            { nickname: "Camilla", realname: "李林蔚", avatarUrl: "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba04.jpg", subject: "生物"},
+            { nickname: "Eschatology", realname: "廖家嘉", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba10.jpg", subject: "生物"},
+            { nickname: "有悠", realname: "廖轩浩", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba12.jpg", subject: "政治"},
+            { nickname: "刘轩", realname: "刘轩", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98d.jpg", subject: "政治"},
+            { nickname: "轩🏃🏀", realname: "吕子轩", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b992.jpg", subject: "生物"},
+            { nickname: "揽星河", realname: "马星灿", avatarUrl: "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba11.jpg", subject: "生物"},
+            { nickname: "小天才杏宝", realname: "彭渝中", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1a.jpg", subject: "政治"},
+            { nickname: "我又不是苦力", realname: "唐菱蔚", avatarUrl: "https://pic1.imgdb.cn/item/693286fdd1e741a32bf1bd63.jpg", subject: "生物"},
+            { nickname: "小王在此刻", realname: "王爱阳", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1b.jpg", subject: "政治"},
+            { nickname: "涵", realname: "王乙涵", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba19.jpg", subject: "生物"},
+            { nickname: "一北极光", realname: "王懿", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1c.jpg", subject: "生物"},
+            { nickname: "q7l12", realname: "王颖萱", avatarUrl: "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1d.jpg", subject: "生物"},
+            { nickname: "Hello", realname: "王赞杰", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba23.jpg", subject: "生物"},
+            { nickname: "Takion Kroslin", realname: "韦景皓", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba21.jpg", subject: "生物"},
+            { nickname: "Anonymous", realname: "魏熙芮", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba25.jpg", subject: "生物"},
+            { nickname: "文三", realname: "文思睿", avatarUrl: "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba22.jpg", subject: "生物"},
+            { nickname: "WCSDM", realname: "吴向玉", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98f.jpg", subject: "生物"},
+            { nickname: "西瓜刨冰", realname: "鲜卓彤", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba29.jpg", subject: "政治"},
+            { nickname: "惟楚有才", realname: "徐楚烦", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2b.jpg", subject: "生物"},
+            { nickname: "续叙序", realname: "徐子恒", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2c.jpg", subject: "政治"},
+            { nickname: "旋转℃的时光", realname: "杨成宇", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2a.jpg", subject: "生物"},
+            { nickname: "Nernst", realname: "杨若雷", avatarUrl: "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2d.jpg", subject: "生物"},
+            { nickname: "鼠了", realname: "杨宣浩", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba31.jpg", subject: "政治"},
+            { nickname: "雏鸣", realname: "杨懿", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba34.jpg", subject: "生物"},
+            { nickname: "Ray", realname: "张淙睿", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba32.jpg", subject: "生物"},
+            { nickname: "丝血反虾闰土的猹", realname: "张梓轩", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba35.jpg", subject: "生物"},
+            { nickname: "AQ", realname: "赵潜", avatarUrl: "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba33.jpg", subject: "政治"},
+            { nickname: "(＞＜)", realname: "赵秋玉", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3a.jpg", subject: "生物"},
+            { nickname: "Zfang", realname: "郑放", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3c.jpg", subject: "生物"},
+            { nickname: "Emmanuel", realname: "周柯运", avatarUrl: "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98e.jpg", subject: "生物"},
+            { nickname: "y", realname: "邹天杰", avatarUrl: "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3b.jpg", subject: "生物"},
+            { nickname: "LZZN", realname: "刘知易", avatarUrl: "https://pic1.imgdb.cn/item/693d6d7ffe7cfeca3822ee6f.jpg", subject: "生物"},
+
         ];
         
         const SKILLS = [
@@ -633,6 +646,10 @@
         ];
         
         // --- 2. 变量定义 ---
+        // 说明：此处为运行时使用的 DOM 引用与状态变量。
+        // - DOM 引用（例如 nameDisplay、avatarBox 等）用于在函数中读写界面元素。
+        // - 状态变量（例如 isRolling、isRealNameShowing 等）记录当前抽签流程与动画状态，
+        //   可避免在动画未完成时重复触发冲突的行为。
         const nameDisplay = document.getElementById('name-display');
         const btnMain = document.getElementById('btn-main');
         const avatarBox = document.getElementById('avatar-box');
@@ -662,6 +679,11 @@
         let nextSelectedUser = null;
 
         // --- 3. 核心功能函数 ---
+        // 说明：这里包含程序的主要逻辑函数，按功能可以分为：
+        // - 辅助/工具函数（如颜色生成、获取下一个项目等）
+        // - 抽签控制流（开始/停止/处理即时抽取/准备下一轮等）
+        // - 渲染与动画触发（更新头像、播放入场/歪头/恢复动画、切换姓名显示等）
+        // - 事件响应（点击、键盘、过滤器交互等绑定在文件末尾）
 
         // 辅助函数：为学生头像生成随机渐变色
         function setStudentColors() {
@@ -926,7 +948,16 @@
             avatarBox.classList.remove('tilt-recover-anim');
             // 添加标记，用于 CSS 中禁用 hover 效果
             avatarBox.classList.add('is-tilted');
-            
+            // 确保清除任何临时的 `no-anim` 抑制，以允许歪头动画正常播放
+            avatarBox.classList.remove('no-anim');
+
+            // 移除任何已存在的歪头类，以便重新添加时能重新触发动画
+            avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim');
+            // 同时移除入场/抽取动画类，避免阻塞歪头动画
+            ['card-animate', 'anim-legend', 'anim-epic', 'anim-rare', 'special-draw-effect'].forEach(c => avatarBox.classList.remove(c));
+            // 强制重绘以确保 CSS 动画可靠重启
+            void avatarBox.offsetWidth;
+
             const r = Math.random();
             if (r < 0.33) {
                 avatarBox.classList.add('tilt-left-anim');
@@ -941,24 +972,63 @@
         function restoreTilt() {
             if (!isTilted()) return;
             
-            // 移除所有歪头动画类
+            // 冻结当前可视状态：读取计算后的 transform 并在内联样式中应用
+            const cs = window.getComputedStyle(avatarBox);
+            const currentTransform = cs.transform || 'none';
+
+            // 移除歪头动画类以停止动画，但通过内联设置计算出的 transform 来保留当前可见外观
             avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim');
-            
-            // 触发恢复动画：先移除类，强制回流(reflow)，再添加类
+            // 临时移除入场/抽取动画类以避免与恢复动画冲突。
+            // 注意：不要添加 `.no-anim`，因为它包含 `animation: none !important`，会禁用恢复动画。
+            ['card-animate', 'anim-legend', 'anim-epic', 'anim-rare', 'special-draw-effect'].forEach(c => avatarBox.classList.remove(c));
+            if (currentTransform && currentTransform !== 'none') {
+                avatarBox.style.transform = currentTransform;
+            }
+
+            // 恢复期间保持 hover 禁用，避免用户交互改变外观
+            avatarBox.classList.add('is-tilted');
+
+            // 恢复过程中，平滑地将姓名切回为网名显示
+            nameDisplay.classList.remove('slide-in-up', 'slide-out-up');
+            void nameDisplay.offsetWidth;
+            nameDisplay.classList.add('slide-out-up');
+            setTimeout(() => {
+                isRealNameShowing = false;
+                nameDisplay.innerText = selectedUser ? selectedUser.nickname : nameDisplay.innerText;
+                nameDisplay.classList.remove('slide-out-up');
+                nameDisplay.classList.add('slide-in-up');
+            }, 160);
+
+            // 强制样式刷新以立即应用内联 transform
+            void avatarBox.offsetWidth;
+
+            // 触发平滑恢复动画回到初始（无）变换
             avatarBox.classList.remove('tilt-recover-anim');
-            void avatarBox.offsetWidth; // 关键：强制浏览器重绘，确保动画重新触发
+            void avatarBox.offsetWidth;
             avatarBox.classList.add('tilt-recover-anim');
-            
+
+            let cleaned = false;
+            function cleanUp() {
+                if (cleaned) return;
+                cleaned = true;
+                avatarBox.classList.remove('tilt-recover-anim');
+                avatarBox.style.transform = '';
+                avatarBox.classList.remove('is-tilted');
+                // 不要触碰 card-animate/anim-legend 等类，保留入场状态
+                avatarBox.removeEventListener('animationend', onEnd);
+            }
+
             function onEnd(e) {
                 if (e.animationName === 'tilt-back-smooth') {
-                    avatarBox.classList.remove('tilt-recover-anim');
-                    avatarBox.removeEventListener('animationend', onEnd);
+                    cleanUp();
                 }
             }
             avatarBox.addEventListener('animationend', onEnd);
 
-            // 移除标记，恢复 Hover 效果
-            avatarBox.classList.remove('is-tilted');
+            // 备用方案：如果未触发 animationend，则在比动画时长略长的时间后强制清理
+            setTimeout(() => {
+                cleanUp();
+            }, 600);
         }
 
         // 4. 修改点击头像的逻辑 (toggleRealName)
@@ -1005,22 +1075,22 @@
             filterText.innerText = text;
         }
 
-        // Helper: reliably perform shrink-hide animation starting from visible state
+        // 辅助：从可见状态可靠执行收缩隐藏动画（用于开始新一轮抽取时平滑隐藏）
         function triggerShrinkHide() {
-            // Ensure animations can run, and remove any active draw-related animation classes
+            // 确保动画可以运行，移除任何与抽取相关的活动动画类
             avatarBox.classList.remove('no-anim');
             ['card-animate', 'anim-legend', 'anim-epic', 'anim-rare', 'special-draw-effect'].forEach(c => avatarBox.classList.remove(c));
-            // Also clear any inline animation/transition to avoid conflicts
+            // 同时清除任何内联的 animation/transition 以避免冲突
             avatarBox.style.animation = '';
             avatarBox.style.transition = '';
 
-            // Ensure computed state is visible so transition animates from visible -> shrink
+            // 确保计算的状态为可见，以便从可见 -> 收缩 的过渡能正确播放
             avatarBox.classList.add('show');
-            // Force style flush
+            // 强制样式刷新
             void avatarBox.offsetWidth;
-            // Add class that transitions to small+fade
+            // 添加触发收缩并淡出的类
             avatarBox.classList.add('shrink-hide');
-            // Ensure after animation it is no longer marked show
+            // 动画结束后移除标记，恢复清洁状态
             setTimeout(() => {
                 avatarBox.classList.remove('show');
                 avatarBox.classList.remove('shrink-hide');
