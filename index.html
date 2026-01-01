@@ -11,7 +11,10 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #ffffff;
+            /* 增强的浅墨绿色渐变背景（自上而下），更明显的底色以衬托半透明组件 */
+            background: linear-gradient(180deg, #ffffff 0%, rgba(29, 116, 77, 0.863) 100%);
+            background-size: 200% 200%;
+            animation: subtleFlow 20s linear infinite;
             color: #000000;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
             height: 100vh;
@@ -23,6 +26,50 @@
             perspective: 1000px;
         }
 
+        :root {
+            --glass-alpha: 0.50; /* 统一毛玻璃透明度（调低以增强透明感） */
+        }
+
+        /* 背景柔和光斑（由 JS 定期调整 transform，产生随机平滑漂浮） */
+        .bg-dots { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .bg-dot { position: absolute; border-radius: 50%; filter: blur(36px); mix-blend-mode: screen; opacity: 0.9; transition: transform 10s cubic-bezier(0.22,0.7,0.3,1); }
+        .bg-dot.a { width: 300px; height: 300px; left: -14%; top: 6%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.32) 0%, rgba(0,140,80,0.36) 28%, rgba(0,110,65,0.22) 45%, transparent 62%);
+            filter: blur(36px);
+            box-shadow: 0 0 160px rgba(0,140,80,0.46);
+            mix-blend-mode: screen;
+        }
+        .bg-dot.b { width: 380px; height: 380px; left: 6%; top: 58%;
+            background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.28) 0%, rgba(0,120,70,0.30) 30%, rgba(0,95,60,0.18) 48%, transparent 66%);
+            filter: blur(34px);
+            box-shadow: 0 0 140px rgba(0,120,70,0.40);
+            mix-blend-mode: screen;
+        }
+        .bg-dot.c { width: 280px; height: 280px; right: -8%; top: 26%;
+            background: radial-gradient(circle at 25% 35%, rgba(255,255,255,0.30) 0%, rgba(0,130,75,0.32) 30%, rgba(0,100,60,0.20) 48%, transparent 66%);
+            filter: blur(34px);
+            box-shadow: 0 0 150px rgba(0,130,75,0.42);
+            mix-blend-mode: screen;
+        }
+
+        /* 通用低调 hover glow（以鼠标为中心的柔和光晕） */
+        .glass-hover-target { position: relative; --mx:50%; --my:50%; }
+        .glass-hover-target::before {
+            content: '';
+            position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; border-radius: inherit;
+            background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.80) 0%, rgba(200,255,220,0.20) 16%, rgba(60,220,140,0.10) 30%, transparent 60%);
+            opacity: 0; transition: opacity 120ms ease, transform 120ms ease; mix-blend-mode: screen;
+            filter: blur(12px) saturate(1.15) contrast(1.08);
+        }
+        .glass-hover-target:hover::before { opacity: 1; }
+        .glass-hover-target:hover::before { opacity: 1; }
+
+        @keyframes subtleFlow {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
         .main-content {
             flex-grow: 1; 
             display: flex;
@@ -31,6 +78,7 @@
             justify-content: center;
             width: 100%;
             position: relative;
+            z-index: 10;
         }
 
         /* --- 过滤器样式 --- */
@@ -42,9 +90,9 @@
         }
 
         #btn-filter {
-            background-color: #fff;
+            background-color: rgb(255, 255, 255, var(--glass-alpha));
             color: #000;
-            border: 1px solid #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, var(--glass-alpha));
             padding: 10px 24px;
             min-width: 120px;
             font-size: 15px;
@@ -58,15 +106,23 @@
         }
 
         #btn-filter:hover {
-            background-color: #f9f9f9;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: rgba(230, 230, 230, var(--glass-alpha));
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
             transform: translateY(-1px);
         }
 
         #btn-filter.active {
-            background-color: #000;
             color: #fff;
-            border-color: #000;
+            border-color: rgba(76,175,80,0.18);
+            box-shadow: 0 10px 28px rgba(76,175,80,0.06);
+        }
+        #btn-filter.active::before {
+            /* active 时给 ::before 一个更暖的高光并保持可见 */
+            background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.48) 0%, rgba(160,255,180,0.16) 20%, rgba(70,230,140,0.08) 38%, transparent 60%);
+            opacity: 1;
+            filter: blur(4px) saturate(1.08);
+            mix-blend-mode: screen;
+            box-shadow: 0 6px 30px rgba(50,200,120,0.12) inset;
         }
 
         .filter-menu {
@@ -74,10 +130,10 @@
             top: calc(100% + 10px); 
             left: 50%;
             transform: translateX(-50%) translateY(-10px);
-            background-color: #fff;
-            border: none;
+            background: rgba(255,255,255,var(--glass-alpha));
+            border: 1px solid rgba(0,0,0,0.04);
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
             padding: 6px;
             min-width: 140px;
             opacity: 0;
@@ -152,25 +208,26 @@
             margin-bottom: 20px;
         }
 
+        /* 头像容器基础（统一半透明毛玻璃风格，初始为隐藏态，由 `.show` 控制显示） */
         .avatar-container {
             width: 200px;
             height: 200px;
             border-radius: 40px;
             overflow: hidden;
-            border: 4px solid #000;
-            
-            /* --- 核心修复：吸入式消失动画的基础状态 --- */
-            opacity: 0; 
-            transform: scale(0) rotate(-45deg); /* 消失时缩成0并略微旋转 */
-            /* 使用 elastic 贝塞尔曲线实现 Q 弹的出现/消失效果 */
-            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
-            
-            cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            position: relative; 
-            background-color: #fff; 
+            border: 1px solid rgba(0,0,0,0.06);
+            background: rgba(255,255,255,var(--glass-alpha));
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 12px 26px rgba(0,0,0,0.08);
+            position: relative;
             user-select: none;
             -webkit-user-select: none;
+
+            /* 初始为收缩/隐藏状态，`.show` 会切换为可见 */
+            opacity: 0;
+            transform: scale(0) rotate(-45deg);
+            transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+            cursor: pointer;
         }
         
         
@@ -179,6 +236,12 @@
         .avatar-container.student-border {
             border: none; /* 移除默认实线边框 */
             box-shadow: 0 14px 30px rgba(0,0,0,0.08); /* 基础阴影，和光效叠加 */
+            /* 毛玻璃式的边框底色（图片本身不会被模糊） */
+            background: linear-gradient(rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
         .avatar-container.student-border::after {
             content: '';
@@ -216,6 +279,95 @@
         
         .avatar-container.hide-img .avatar-img {
             display: none;
+        }
+
+        /* 通用半透明玻璃质感（保留原色调，只作半透明叠加） */
+        .glass-surface {
+            background: rgba(255,255,255,var(--glass-alpha));
+            border: 1px solid rgba(255,255,255,0.18);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+        }
+
+        /* 将页面常用组件设为玻璃质感，但保留其颜色声明（选中颜色会覆盖背景） */
+        button.action-btn, #btn-filter, .filter-menu, .filter-option, #btn-reveal, .footer, .avatar-container {
+            /* 不强制覆盖颜色，只提供半透明底与模糊效果 */
+            background-clip: padding-box;
+        }
+
+        /* 为常用块提供轻量级玻璃底（通过 rgba 覆盖原有纯色以实现毛玻璃） */
+        button.action-btn {
+            background: rgba(0,0,0,var(--glass-alpha));
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #fff;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        #btn-filter {
+            background: rgba(255,255,255,var(--glass-alpha));
+            border: 1px solid rgba(0,0,0,0.06);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .filter-menu {
+            background: rgba(255,255,255,var(--glass-alpha));
+            border: 1px solid rgba(0,0,0,0.06);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .filter-option {
+            background: transparent; /* 保留颜色声明，hover/selected 会覆盖 */
+        }
+
+        /* 使不同选中配色为半透明以展现玻璃感 */
+        .filter-option.base-option.selected {
+            background-color: rgba(0,0,0,var(--glass-alpha));
+            border: 1px solid rgba(255,255,255,var(--glass-alpha));
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .filter-option.bonus-skill.selected {
+            background-color: rgba(255,152,0,var(--glass-alpha));
+            border: 1px solid rgba(255,255,255,var(--glass-alpha));
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .filter-option.bonus-teacher.selected {
+            background-color: rgba(33,150,243,var(--glass-alpha));
+            border: 1px solid rgba(255,255,255,var(--glass-alpha));
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .filter-option.instant-option.selected {
+            background-color: rgba(211,47,47,0.38);
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .filter-option.simple-mode-option.selected {
+            background-color: rgba(76,175,80,0.38);
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        /* 悬停使用更轻的半透明覆盖，保持原始配色暗示 */
+        .filter-option:hover { background-color: rgba(255,255,255,0.06); }
+        .filter-option.instant-option:hover { background-color: rgba(255,235,238,0.12); }
+        .filter-option.simple-mode-option:hover { background-color: rgba(165,214,167,0.12); }
+
+        /* （avatar-container 基础样式已在上方统一定义） */
+
+        #btn-reveal {
+            background: rgba(255,255,255,var(--glass-alpha));
+            border: 1px solid rgba(0,0,0,0.08);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            color: #000;
         }
 
         /* --- 技能/老师文字优化 --- */
@@ -370,6 +522,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
+        }
+
+        /* 图片与 student-border 的内边框对齐 */
+        .avatar-container.student-border .avatar-img {
+            border-radius: calc(40px - 4px);
         }
         
         /* --- 中间：名字显示 --- */
@@ -388,12 +546,16 @@
             letter-spacing: 1px;
             padding: 10px 40px;
             border-radius: 24px;
-            background-color: #f7f7f7;
-            border: 2px solid #f0f0f0;
+            /* 半透明玻璃感背景 */
+            background: rgba(250,250,250,var(--glass-alpha));
+            border: 1px solid rgba(255,255,255,0.6);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             min-width: 320px;
             overflow: hidden;
             position: relative;
             color: #1a1a1a;
+            box-shadow: 0 6px 16px rgba(20,20,20,0.04);
         }
 
         @keyframes slideOutUp {
@@ -416,23 +578,26 @@
         }
 
         button.action-btn {
-            background-color: #000;
-            color: #fff;
-            border: none;
+            /* 轻透明毛玻璃主按钮信面（更透明、无重黑边） */
+            background: rgba(255,255,255,var(--glass-alpha));
+            color: #111;
+            border: 1px solid rgba(0,0,0,0.06);
             padding: 16px 48px; 
             font-size: 18px;
             font-weight: 700;
             border-radius: 100px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.22s cubic-bezier(0.25, 0.8, 0.25, 1);
             outline: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
 
         button.action-btn:hover {
-            background-color: #333;
+            background-color: rgba(255,255,255,calc(var(--glass-alpha) + 0.05));
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.09);
         }
 
         button.action-btn:active { transform: translateY(0); }
@@ -443,11 +608,11 @@
             box-shadow: none;
         }
 
-        /* 显示原名按钮 */
+        /* 显示原名按钮（使用毛玻璃统一样式） */
         #btn-reveal {
-            background-color: #fff;
+            background: rgba(255,255,255,var(--glass-alpha));
             color: #000;
-            border: 2px solid #000;
+            border: 1px solid rgba(0,0,0,0.06);
             opacity: 0;
             visibility: hidden;
             transform: translateY(15px);
@@ -457,10 +622,12 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
 
-        #btn-reveal:hover { background-color: #f7f7f7; }
+        #btn-reveal:hover { background-color: rgba(255,255,255,calc(var(--glass-alpha) + 0.05)); }
         .reveal-show {
             opacity: 1 !important;
             visibility: visible !important;
@@ -476,15 +643,19 @@
         .footer {
             width: 100%;
             padding: 12px 0;
-            background-color: #fafafa;
+            background: rgba(255,255,255,calc(var(--glass-alpha) * 0.9));
+            border: 1px solid rgba(0,0,0,0.04);
             border-top: none;
             text-align: center;
             font-size: 13px;
-            color: #888;
+            color: #666;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 12px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
         }
         .footer-separator { color: #ddd; font-size: 14px; }
         .footer-github a {
@@ -497,9 +668,63 @@
         .footer-github a:hover { color: #000; }
         .github-icon { width: 18px; height: 18px; fill: currentColor; display: block; }
 
+        /* --- 新增样式 --- */
+
+        /* 简易模式按钮样式 (深灰色，与红色区分) */
+        .filter-option.simple-mode-option {
+            color: #333;
+            font-weight: 600;
+        }
+        .filter-option.simple-mode-option:hover { background-color: #a5d6a7; }
+        .filter-option.simple-mode-option.selected {
+            background-color: #4caf50;
+            color: #fff;
+        }
+
+        /* 简易模式下隐藏头像区域的样式 */
+        .top-section {
+            /* 加上 transition 实现平滑消失/出现 */
+            transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
+        }
+        .top-section.hidden-mode {
+            opacity: 0;
+            height: 0;
+            margin-bottom: 0;
+            pointer-events: none;
+        }
+
+        /* Toast 提示框样式 */
+        #toast-msg {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            pointer-events: none; 
+        }
+        #toast-msg.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
     </style>
 </head>
 <body>
+
+    <div class="bg-dots" aria-hidden="true">
+        <div class="bg-dot a"></div>
+        <div class="bg-dot b"></div>
+        <div class="bg-dot c"></div>
+    </div>
 
     <div class="main-content">
         <div class="filter-container">
@@ -519,10 +744,11 @@
 
                 <div class="filter-separator"></div>
                 <div class="filter-option instant-option" id="btn-instant-mode">⚡ 直接抽取</div>
+                <div class="filter-option simple-mode-option" id="btn-simple-mode">🕶️ 简易模式</div>
             </div>
         </div>
         
-        <div class="top-section">
+        <div class="top-section" id="top-section">
             <div class="avatar-container" id="avatar-box" title="点击切换显示真名/网名">
                 <div class="non-person-name" id="non-person-name-display" style="display: none;"></div>
                 <img src="" alt="Avatar" class="avatar-img" id="avatar-img">
@@ -537,6 +763,8 @@
             <button id="btn-main" class="action-btn">开始滚动</button>
         </div>
     </div>
+
+    <div id="toast-msg">简易模式不显示头像和网名，采用直接抽取</div>
     
     <div class="footer">
         <span>Copyright © Takion Kroslin 2026</span>
@@ -640,10 +868,53 @@
         ];
 
         const startPhrases = [
-            "让我看看谁在紧张", "是谁的小鹿在乱撞", "深呼吸，头晕是正常的",
-            "别躲了，我都看到你了", "此时一名幸运观众汗流浃背", "命运的齿轮开始转动",
-            "只是抽个查，别慌", "眼神别飘，看着我", "准备好你的表演了吗", "让我康康是谁这么幸运"
+            "让我看看谁在紧张",
+            "是谁的小鹿在乱撞",
+            "深呼吸，头晕是正常的",
+            "别躲了，我都看到你了",
+            "此时一名幸运观众汗流浃背",
+            "命运的齿轮开始转动",
+            "只是抽个查，别慌",
+            "眼神别飘，看着我",
+            "准备好你的表演了吗",
+            "让我康康是谁这么幸运",
+
+            "气氛突然变得不太友好",
+            "这一刻，总有人在装镇定",
+            "心跳声有点大了",
+            "有人已经开始后悔来上这节课了",
+            "别急，还没轮到你（也可能是）",
+            "有人的手心开始出汗了",
+
+            "此时一位同学正在疯狂祈祷",
+            "有人已经在脑内演练答案了",
+            "后排集体屏住了呼吸",
+            "这不是随机，这是命",
+            "全班最不想被点到的人，正在被点到",
+            "别看手机了，说的就是你",
+
+            "命运正在缓慢加载",
+            "选择权，交给随机数",
+            "这一秒，概率开始显灵",
+            "命运的光标停下来了",
+            "一切都不是巧合",
+            "抽取中，请保持肃静",
+
+            "CPU 已经开始过热",
+            "大脑：未响应",
+            "灵魂已离线",
+            "正在检测谁最慌",
+            "本系统不接受装死",
+            "已锁定一名人类目标",
+
+            "这是一次完全公平的随机事件",
+            "请对算法保持尊重",
+            "数据不会偏心",
+            "理论上，这不该是你",
+            "概率论正在看着你",
+            "本次抽取不含私人恩怨"
         ];
+
         
         // --- 2. 变量定义 ---
         // 说明：此处为运行时使用的 DOM 引用与状态变量。
@@ -660,6 +931,13 @@
         const filterMenu = document.getElementById('filter-menu');
         const btnInstantMode = document.getElementById('btn-instant-mode');
         
+        // ⬇️ 新增变量：简易模式、提示、顶部区域控制
+        const btnSimpleMode = document.getElementById('btn-simple-mode');
+        const toastMsg = document.getElementById('toast-msg');
+        const topSection = document.getElementById('top-section');
+        const btnReveal = document.getElementById('btn-reveal');
+        let isSimpleMode = false;
+
         const baseOptions = document.querySelectorAll('.filter-option.base-option');
         const bonusOptions = document.querySelectorAll('.filter-option.bonus-option');
 
@@ -677,6 +955,13 @@
         let shuffledList = []; 
         
         let nextSelectedUser = null;
+
+        // Helper to read unified glass alpha from CSS
+        function getGlassAlpha() {
+            const v = getComputedStyle(document.documentElement).getPropertyValue('--glass-alpha');
+            const parsed = parseFloat(v);
+            return isNaN(parsed) ? 0.68 : parsed;
+        }
 
         // --- 3. 核心功能函数 ---
         // 说明：这里包含程序的主要逻辑函数，按功能可以分为：
@@ -769,33 +1054,30 @@
         
         function startRolling() {
             if (isRolling) return; 
-            // 如果是直接抽取模式
-            if (isInstantMode) {
-                // 如果当前处于歪头状态，先清除，但不做动画，直接消失
-                if (isTilted()) {
-                    avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim', 'is-tilted');
-                }
 
-                // 执行收缩吸入隐藏上一个头像
-                triggerShrinkHide();
-                btnMain.disabled = true;
-
-                setTimeout(() => {
-                    handleInstantDraw();
-                }, 500); // 等待吸入动画完成
+            // 【新增】如果是简易模式，直接强制走直接抽取逻辑
+            if (isSimpleMode) {
+                handleInstantDraw();
                 return;
             }
 
-            // 普通滚动模式
-            // 每次开始前，清理所有特殊状态和动画
-            avatarBox.classList.remove('anim-legend', 'anim-epic', 'anim-rare', 'card-animate', 
-                                       'tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim', 'is-tilted');
-            // 清理任何之前通过 JS 设置的自定义样式（边框/光效）
-            // 然后触发收缩吸入隐藏上一个头像
+            // 如果是直接抽取模式
+            if (isInstantMode) {
+                if(isTilted()) {
+                    avatarBox.classList.remove('is-tilted', 'tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim');
+                }
+                triggerShrinkHide();
+                btnMain.disabled = true;
+                setTimeout(() => { handleInstantDraw(); }, 500);
+                return;
+            }
+            
+            // 普通滚动模式代码：只移除会影响歪头/过渡的临时类，保留 anim-legend/epic/rare 以保留光效与边框
+            avatarBox.classList.remove('card-animate', 'special-draw-effect', 'is-tilted', 'tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim');
+
             triggerShrinkHide();
             btnMain.disabled = true;
 
-            // 等待消失动画(300-500ms)后开始滚动名字
             setTimeout(() => {
                 if (!nextSelectedUser && !filterAndShuffleDatabase()) {
                     btnMain.disabled = false;
@@ -806,7 +1088,7 @@
                     if(!nextSelectedUser) return;
                 }
                 doStartRollLogic();
-            }, 300);
+            }, 500);
         }
         
         function handleInstantDraw() {
@@ -831,13 +1113,14 @@
             btnMain.disabled = true; 
             btnMain.innerText = "抽取"; 
             
-            avatarBox.classList.remove('show'); 
+            triggerShrinkHide();
             
             // 重置状态
             nameDisplay.classList.remove('slide-out-up', 'slide-in-up');
             isRealNameShowing = false; 
-            nameDisplay.style.backgroundColor = "#f7f7f7";
-            nameDisplay.style.borderColor = "#f0f0f0";
+            const _alpha = getGlassAlpha();
+            nameDisplay.style.backgroundColor = `rgba(250,250,250,${_alpha})`;
+            nameDisplay.style.borderColor = "rgba(255,255,255,0.6)";
 
             timer = setInterval(() => {
                 const randomIndex = Math.floor(Math.random() * filteredDatabase.length);
@@ -849,6 +1132,24 @@
                     btnMain.disabled = false;
                 }
             }, 300); 
+        }
+
+        // 强制停止滚动（用于切换模式/过滤器时防止冲突）
+        function forceStopRolling() {
+            if (isRolling) {
+                clearInterval(timer);
+                isRolling = false;
+                btnMain.disabled = false;
+                // 根据当前模式重置按钮文字
+                if (isInstantMode || isSimpleMode) {
+                    btnMain.innerText = "点击抽取";
+                } else {
+                    btnMain.innerText = "开始滚动";
+                }
+                // 重置所有视觉状态
+                avatarBox.classList.remove('show', 'card-animate', 'special-draw-effect');
+                avatarBox.classList.remove('is-tilted', 'tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim');
+            }
         }
 
         function stopRolling() {
@@ -867,59 +1168,63 @@
         function renderResult(user) {
             if (!user) return;
 
-            nameDisplay.innerText = user.nickname;
+            // 【新增】简易模式特殊渲染逻辑
+            if (isSimpleMode) {
+                // 强制显示真名
+                nameDisplay.innerText = user.realname;
+                // 强制使用朴素背景
+                const _alpha_sm = getGlassAlpha();
+                nameDisplay.style.backgroundColor = `rgba(250,250,250,${_alpha_sm})`;
+                nameDisplay.style.borderColor = "rgba(255,255,255,0.6)";
+                
+                // 不处理头像动画，直接恢复按钮
+                btnMain.disabled = false;
+                return;
+            }
 
+            nameDisplay.innerText = user.nickname;
+            
             const isSpecialItem = user.isSpecial;
             const hasAvatar = user.hasAvatar === true; 
             const rarity = user.rarity || 'rare'; 
 
-            // 重置基础类
             avatarBox.className = 'avatar-container'; 
             
-            // 1. 设置内容模式 (图片 vs 文字)
             if (isSpecialItem && !hasAvatar) {
-                // 特殊物品无头像 -> 纯文字
                 avatarBox.classList.add('hide-img', user.className || 'skill-item');
-                // 特殊物品无头像时也不用Hover放大
                 avatarBox.classList.add('no-hover-effect');
                 nonPersonNameDisplay.innerText = user.nickname;
                 nonPersonNameDisplay.style.display = 'flex'; 
                 avatarImg.style.display = 'none';
                 
-                // 移除学生边框，防止颜色残留
                 avatarBox.classList.remove('student-border', 'glow');
                 avatarBox.style.removeProperty('--c1');
                 avatarBox.style.removeProperty('--c2');
                 avatarBox.style.removeProperty('--glow');
             } else {
-                // 学生 或 有头像的老师 -> 图片
                 avatarImg.src = user.avatarUrl;
                 avatarImg.style.display = 'block'; 
                 nonPersonNameDisplay.style.display = 'none';
                 avatarBox.classList.remove('hide-img', 'skill-item', 'teacher-item', 'no-hover-effect');
                 
-                // 如果是学生(非特殊)，应用学生专属边框和随机颜色
                 if (!isSpecialItem) {
                     avatarBox.classList.add('student-border', 'glow');
                     setStudentColors();
                 } else {
-                    // 有头像的特殊角色(老师)，清除学生边框
                     avatarBox.classList.remove('student-border', 'glow');
                 }
             }
 
-            // 2. 应用入场动画类
-            let animClass = 'card-animate'; // 默认学生: 经典翻转
+            let animClass = 'card-animate'; 
             if (isSpecialItem) {
                 if (rarity === 'legend') animClass = 'anim-legend';
                 else if (rarity === 'epic') animClass = 'anim-epic';
                 else animClass = 'anim-rare';
             }
             
-            void avatarBox.offsetWidth; // 强制重绘
+            void avatarBox.offsetWidth; 
             avatarBox.classList.add(animClass);
 
-            // 动画时长控制
             const animationDuration = isSpecialItem ? 1300 : 1800;
             
             setTimeout(() => {
@@ -930,6 +1235,12 @@
                 } else {
                     btnMain.innerText = "开始滚动";
                 }
+                
+                // 【修复】只有非特殊物品显示原名按钮
+                if (!isSpecialItem) {
+                    if (btnReveal) btnReveal.classList.add('reveal-show');
+                }
+                
             }, animationDuration);
         }
 
@@ -953,8 +1264,8 @@
 
             // 移除任何已存在的歪头类，以便重新添加时能重新触发动画
             avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim');
-            // 同时移除入场/抽取动画类，避免阻塞歪头动画
-            ['card-animate', 'anim-legend', 'anim-epic', 'anim-rare', 'special-draw-effect'].forEach(c => avatarBox.classList.remove(c));
+            // 仅移除会与歪头冲突的临时动画类，保留特殊等级的 anim-* 类以保留光效与边框
+            ['card-animate', 'special-draw-effect'].forEach(c => avatarBox.classList.remove(c));
             // 强制重绘以确保 CSS 动画可靠重启
             void avatarBox.offsetWidth;
 
@@ -978,9 +1289,8 @@
 
             // 移除歪头动画类以停止动画，但通过内联设置计算出的 transform 来保留当前可见外观
             avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim');
-            // 临时移除入场/抽取动画类以避免与恢复动画冲突。
-            // 注意：不要添加 `.no-anim`，因为它包含 `animation: none !important`，会禁用恢复动画。
-            ['card-animate', 'anim-legend', 'anim-epic', 'anim-rare', 'special-draw-effect'].forEach(c => avatarBox.classList.remove(c));
+            // 仅移除会影响恢复流程的临时动画类，保留 anim-legend/epic/rare 以保持边框和光效
+            ['card-animate', 'special-draw-effect'].forEach(c => avatarBox.classList.remove(c));
             if (currentTransform && currentTransform !== 'none') {
                 avatarBox.style.transform = currentTransform;
             }
@@ -1033,7 +1343,7 @@
 
         // 4. 修改点击头像的逻辑 (toggleRealName)
         function toggleRealName() {
-            if (!selectedUser) return;
+            if (!selectedUser || isSimpleMode) return; // 【修改】简易模式禁用切换
             
             // 【修复逻辑】：如果已经在歪头状态，点击则复位，不再切换名字
             if (isTilted()) {
@@ -1054,10 +1364,10 @@
                 
                 if (isRealNameShowing) {
                     nameDisplay.innerText = selectedUser.realname;
-                    nameDisplay.style.backgroundColor = "#f7f7f7"; 
+                    nameDisplay.style.backgroundColor = `rgba(250,250,250,${getGlassAlpha()})`;
                 } else {
                     nameDisplay.innerText = selectedUser.nickname;
-                    nameDisplay.style.backgroundColor = "#f7f7f7";
+                    nameDisplay.style.backgroundColor = `rgba(250,250,250,${getGlassAlpha()})`;
                 }
                 
                 nameDisplay.classList.remove('slide-out-up');
@@ -1075,14 +1385,29 @@
             filterText.innerText = text;
         }
 
+        function showToast() {
+            if (!toastMsg) return;
+            toastMsg.classList.add('show');
+            setTimeout(() => {
+                hideToast();
+            }, 2000);
+        }
+        
+        function hideToast() {
+            if (!toastMsg) return;
+            toastMsg.classList.remove('show');
+        }
+
         // 辅助：从可见状态可靠执行收缩隐藏动画（用于开始新一轮抽取时平滑隐藏）
         function triggerShrinkHide() {
             // 确保动画可以运行，移除任何与抽取相关的活动动画类
             avatarBox.classList.remove('no-anim');
-            ['card-animate', 'anim-legend', 'anim-epic', 'anim-rare', 'special-draw-effect'].forEach(c => avatarBox.classList.remove(c));
+            // 只移除会影响收缩过渡的临时动画类，保留特殊等级的 anim-* 类以保持边框/光效
+            ['card-animate', 'special-draw-effect'].forEach(c => avatarBox.classList.remove(c));
             // 同时清除任何内联的 animation/transition 以避免冲突
             avatarBox.style.animation = '';
-            avatarBox.style.transition = '';
+            // 强制设置与 CSS 匹配的过渡，避免被此前的 inline/none 状态阻断
+            avatarBox.style.transition = 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease';
 
             // 确保计算的状态为可见，以便从可见 -> 收缩 的过渡能正确播放
             avatarBox.classList.add('show');
@@ -1094,6 +1419,9 @@
             setTimeout(() => {
                 avatarBox.classList.remove('show');
                 avatarBox.classList.remove('shrink-hide');
+                // 清理临时内联样式，恢复默认样式表控制
+                avatarBox.style.transition = '';
+                avatarBox.style.animation = '';
             }, 520);
         }
 
@@ -1135,10 +1463,13 @@
             if (!avatarBox.contains(e.target) && isTilted()) {
                 restoreTilt();
             }
+
+            hideToast(); // 【新增】点击任意处隐藏 Toast
         });
 
         btnFilter.addEventListener('click', (e) => {
             e.stopPropagation(); 
+            forceStopRolling(); // 【新增】打开菜单时强制停止滚动
             filterMenu.classList.toggle('open');
             btnFilter.classList.toggle('active');
         });
@@ -1148,20 +1479,22 @@
         });
 
         function handleFilterChange() {
-            // 修复逻辑：切换选科时，先执行吸入消失动画
-            avatarBox.classList.remove('show');
-            // 清除歪头状态
+            forceStopRolling(); // 【新增】切换选项时强制停止
+            // 修复逻辑：切换选科时，先移除入场动画类并触发收缩隐藏动画，避免闪现
+            triggerShrinkHide();
+            // 清除歪头状态（同步清理）
             if (isTilted()) {
                 avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim', 'is-tilted');
             }
-            
+
+            // 等待收缩动画完成后再更新列表（略长于动画时长以保证过渡完成）
             setTimeout(() => {
                 updateFilterButtonText();
                 filterAndShuffleDatabase();
                 prepareNextDraw();
                 nameDisplay.innerText = startPhrases[Math.floor(Math.random() * startPhrases.length)];
                 selectedUser = null;
-            }, 500); 
+            }, 560);
         }
 
         baseOptions.forEach(option => {
@@ -1194,6 +1527,15 @@
 
         // 3. 直接抽取模式切换
         btnInstantMode.addEventListener('click', () => {
+            forceStopRolling(); // 【新增】防止冲突
+            
+            // 互斥逻辑：如果开了简易模式，关掉它
+            if (isSimpleMode) {
+                isSimpleMode = false;
+                if (btnSimpleMode) btnSimpleMode.classList.remove('selected');
+                if (topSection) topSection.classList.remove('hidden-mode'); // 恢复头像框
+            }
+
             isInstantMode = !isInstantMode;
             btnInstantMode.classList.toggle('selected');
             
@@ -1207,6 +1549,37 @@
             btnFilter.classList.remove('active');
         });
 
+        // 简易模式切换
+        if (btnSimpleMode) {
+            btnSimpleMode.addEventListener('click', () => {
+                forceStopRolling(); // 【新增】防止冲突
+                
+                isSimpleMode = !isSimpleMode;
+                btnSimpleMode.classList.toggle('selected');
+                
+                if (isSimpleMode) {
+                    // 启用简易模式：关闭直接抽取按钮样式(互斥表现)，启用功能逻辑
+                    if (isInstantMode) {
+                        isInstantMode = false;
+                        btnInstantMode.classList.remove('selected');
+                    }
+                    
+                    btnMain.innerText = "点击抽取";
+                    if (topSection) topSection.classList.add('hidden-mode'); // 隐藏头像区域
+                    if (btnReveal) btnReveal.classList.remove('reveal-show'); // 隐藏切换按钮
+                    
+                    showToast(); // 显示提示
+                } else {
+                    // 关闭简易模式，恢复默认
+                    btnMain.innerText = "开始滚动";
+                    if (topSection) topSection.classList.remove('hidden-mode');
+                }
+                
+                filterMenu.classList.remove('open');
+                btnFilter.classList.remove('active');
+            });
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             filterAndShuffleDatabase();
@@ -1214,6 +1587,46 @@
             updateFilterButtonText();
             nameDisplay.innerText = startPhrases[Math.floor(Math.random() * startPhrases.length)];
         });
+
+        // --- 背景光斑与交互光晕控制 ---
+        (function setupBackgroundAndGlow() {
+            // add glass-hover-target class to common elements
+            const selector = 'button.action-btn, #btn-filter, .filter-menu, .filter-option, .avatar-container, #name-display, .footer, #btn-reveal';
+            const els = document.querySelectorAll(selector);
+            els.forEach(e => e.classList.add('glass-hover-target'));
+
+            // mousemove updates --mx/--my for element under cursor
+            document.addEventListener('mousemove', (ev) => {
+                const el = ev.target.closest('.glass-hover-target');
+                if (!el) return;
+                const r = el.getBoundingClientRect();
+                const px = ((ev.clientX - r.left) / r.width) * 100;
+                const py = ((ev.clientY - r.top) / r.height) * 100;
+                el.style.setProperty('--mx', Math.max(0, Math.min(100, px)) + '%');
+                el.style.setProperty('--my', Math.max(0, Math.min(100, py)) + '%');
+            });
+
+            // Background dots random smooth movement
+            const dots = document.querySelectorAll('.bg-dot');
+            if (!dots || dots.length === 0) return;
+
+            function randomTransform() {
+                dots.forEach((d, i) => {
+                    const tx = (Math.random() * 60 - 30); // vw offset
+                    const ty = (Math.random() * 40 - 20); // vh offset
+                    const s = 0.9 + Math.random() * 0.2;
+                    const r = (Math.random() * 6 - 3);
+                    d.style.transform = `translate3d(${tx}vw, ${ty}vh, 0) scale(${s}) rotate(${r}deg)`;
+                });
+            }
+
+            // seed initial transforms
+            randomTransform();
+            // periodically nudge to new random positions (staggered)
+            setInterval(() => {
+                randomTransform();
+            }, 7000 + Math.floor(Math.random() * 6000));
+        })();
 
     </script>
 </body>

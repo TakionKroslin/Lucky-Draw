@@ -1,0 +1,45 @@
+{
+  "name": "lucky-draw",
+  "version": "2026.0.0",
+  "description": "Lucky Draw - desktop client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:windows": "electron-builder --win --x64 --ia32"
+  },
+  "build": {
+    "appId": "com.example.luckydraw",
+    "productName": "Lucky Draw",
+    "files": [
+      "index.html",
+      "main.js",
+      "preload.js",
+      "README.md",
+      "database_output.txt",
+      "database-generator.py",
+      "更新内容"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64", "ia32"] },
+        { "target": "portable", "arch": ["x64", "ia32"] }
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}
+{
+  "name": "lucky-draw",
+  "version": "1.0.0",
+  "description": "This web-app is a random pick-up website intended for students in Class 17, Grade 2024 of Mianyang Dongchen Middle School, which includes a funny \"lucky draw\" which calls individuals by their nickname, showing their avatar with a hovering animation, and have an alternative to see their real names. Users are required to customize the database before using. Follow the instructions to set up.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
