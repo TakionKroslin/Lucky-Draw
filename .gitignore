@@ -1,0 +1,16 @@
+node_modules/
+
+# Build outputs
+dist/
+dist-*/
+release*/
+
+# Temp/cache
+.tmp_restore/
+*.log
+
+# Optional local data
+database_output.txt
+
+# Secrets
+build/mycert.pfx

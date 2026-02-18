@@ -1,0 +1,102 @@
+.spring-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 30% 20%, rgba(255, 245, 214, 0.22), rgba(14, 36, 27, 0.46));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 260ms ease, visibility 260ms ease;
+}
+
+.spring-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.spring-card {
+    width: min(640px, 90vw);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 16px 40px rgba(8, 30, 21, 0.26), 0 0 30px rgba(250, 210, 126, 0.3);
+    padding: 28px 28px 24px;
+    text-align: center;
+    color: #163122;
+    transform: translateY(8px) scale(0.95);
+    animation: spring-pop 420ms cubic-bezier(0.2, 1, 0.24, 1) forwards;
+}
+
+.spring-card h2 {
+    margin: 0 0 12px;
+    font-size: 30px;
+    letter-spacing: 0.08em;
+}
+
+.spring-card p {
+    margin: 0 0 8px;
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.spring-card .spring-tip {
+    margin-top: 12px;
+    font-size: 13px;
+    opacity: 0.75;
+}
+
+.spring-confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.confetti-piece {
+    position: absolute;
+    top: -24px;
+    width: 10px;
+    height: 16px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #ffd789, #ff9f5a);
+    box-shadow: 0 0 10px rgba(255, 190, 100, 0.36);
+    animation-name: confetti-fall;
+    animation-timing-function: linear;
+}
+
+.confetti-piece:nth-child(3n) {
+    background: linear-gradient(180deg, #97edc9, #58c89d);
+}
+
+.confetti-piece:nth-child(4n) {
+    background: linear-gradient(180deg, #9ed5ff, #6aa9e4);
+}
+
+@keyframes spring-pop {
+    0% {
+        transform: translateY(10px) scale(0.92);
+        opacity: 0;
+    }
+    65% {
+        transform: translateY(-2px) scale(1.03);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.95;
+    }
+    100% {
+        transform: translateY(110vh) rotate(620deg);
+        opacity: 0.05;
+    }
+}

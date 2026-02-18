@@ -1,0 +1,55 @@
+{
+  "name": "bie-jin-zhang",
+  "version": "2.2.0",
+  "description": "17班课堂点名与幸运抽取工具",
+  "author": "Takion Kroslin",
+  "license": "Apache-2.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win nsis --x64 --ia32"
+  },
+  "devDependencies": {
+    "electron": "22.3.27",
+    "electron-builder": "^24.13.3",
+    "electron-updater": "^6.7.3"
+  },
+  "build": {
+    "appId": "com.takion.biejinzhang",
+    "productName": "别紧张",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!dist-*/**",
+      "!release*/**",
+      "!**/.git/**",
+      "!**/.tmp_*/**",
+      "!.tmp_restore/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "TakionKroslin",
+      "repo": "Lucky-Draw"
+    }
+  }
+}

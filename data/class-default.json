@@ -1,0 +1,452 @@
+{
+  "id": "default",
+  "name": "????",
+  "students": [
+    {
+      "nickname": "青行归",
+      "realname": "艾炜杰",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9da.jpg",
+      "subject": "政治 "
+    },
+    {
+      "nickname": "Tiamo",
+      "realname": "艾文博",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dc.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "blue IHrNm",
+      "realname": "曹瑾瑜",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9db.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "陳风",
+      "realname": "陈林霄",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9dd.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "田田小影子",
+      "realname": "陈荍影",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932846ad1e741a32bf1b9d9.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "CzX",
+      "realname": "陈在芯",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9eb.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "🤐",
+      "realname": "程恩泽",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ec.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Il sole.",
+      "realname": "邓淼",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ed.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "pit pony",
+      "realname": "邓萧晓",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328473d1e741a32bf1b9ee.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "白狗黑",
+      "realname": "冯麒霏",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b991.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "高冷人士没有微信",
+      "realname": "高涵予",
+      "avatarUrl": "https://api.dicebear.com/7.x/identicon/svg?seed=Felix",
+      "subject": "生物"
+    },
+    {
+      "nickname": "泱泱清潭",
+      "realname": "高一淳",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f6.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "萝卜丝比尔",
+      "realname": "辜孙雨辰",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f9.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "欧皇知底",
+      "realname": "何奕嘉",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328436d1e741a32bf1b993.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "千",
+      "realname": "韩铭杰",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f7.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "步法鹅",
+      "realname": "衡星玙",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328477d1e741a32bf1b9f5.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "PhuDgue",
+      "realname": "胡铸",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba05.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "黄小妹",
+      "realname": "黄彦洁",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba02.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "无恙.",
+      "realname": "李安然",
+      "avatarUrl": "https://pic1.imgdb.cn/item/694fe8e5161224305eb30b3e.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Touma Kazusa",
+      "realname": "李柯锦",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba03.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Camilla",
+      "realname": "李林蔚",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932847ed1e741a32bf1ba04.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Eschatology",
+      "realname": "廖家嘉",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba10.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "有悠",
+      "realname": "廖轩浩",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba12.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "刘轩",
+      "realname": "刘轩",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98d.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "轩🏃🏀",
+      "realname": "吕子轩",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b992.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "揽星河",
+      "realname": "马星灿",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328489d1e741a32bf1ba11.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "小天才杏宝",
+      "realname": "彭渝中",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1a.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "我又不是苦力",
+      "realname": "唐菱蔚",
+      "avatarUrl": "https://pic1.imgdb.cn/item/693286fdd1e741a32bf1bd63.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "小王在此刻",
+      "realname": "王爱阳",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1b.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "涵",
+      "realname": "王乙涵",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba19.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "一北极光",
+      "realname": "王懿",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1c.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "q7l12",
+      "realname": "王颖萱",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932848fd1e741a32bf1ba1d.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Hello",
+      "realname": "王赞杰",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba23.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Takion Kroslin",
+      "realname": "韦景皓",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba21.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Anonymous",
+      "realname": "魏熙芮",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba25.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "文三",
+      "realname": "文思睿",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328494d1e741a32bf1ba22.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "WCSDM",
+      "realname": "吴向玉",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98f.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "西瓜刨冰",
+      "realname": "鲜卓彤",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba29.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "惟楚有才",
+      "realname": "徐楚烦",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2b.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "续叙序",
+      "realname": "徐子恒",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2c.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "旋转℃的时光",
+      "realname": "杨成宇",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2a.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Nernst",
+      "realname": "杨若雷",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328499d1e741a32bf1ba2d.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "鼠了",
+      "realname": "杨宣浩",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba31.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "雏鸣",
+      "realname": "杨懿",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba34.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Ray",
+      "realname": "张淙睿",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba32.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "丝血反虾闰土的猹",
+      "realname": "张梓轩",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba35.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "AQ",
+      "realname": "赵潜",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6932849cd1e741a32bf1ba33.jpg",
+      "subject": "政治"
+    },
+    {
+      "nickname": "(＞＜)",
+      "realname": "赵秋玉",
+      "avatarUrl": "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3a.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Zfang",
+      "realname": "郑放",
+      "avatarUrl": "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3c.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "Emmanuel",
+      "realname": "周柯运",
+      "avatarUrl": "https://pic1.imgdb.cn/item/69328435d1e741a32bf1b98e.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "y",
+      "realname": "邹天杰",
+      "avatarUrl": "https://pic1.imgdb.cn/item/693284a1d1e741a32bf1ba3b.jpg",
+      "subject": "生物"
+    },
+    {
+      "nickname": "LZZN",
+      "realname": "刘知易",
+      "avatarUrl": "https://pic1.imgdb.cn/item/693d6d7ffe7cfeca3822ee6f.jpg",
+      "subject": "生物"
+    }
+  ],
+  "skills": [
+    {
+      "type": "skill",
+      "nickname": "万箭齐发",
+      "realname": "万箭齐发",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "legend",
+      "className": "skill-item"
+    },
+    {
+      "type": "skill",
+      "nickname": "铁索连环",
+      "realname": "铁索连环",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "epic",
+      "className": "skill-item"
+    },
+    {
+      "type": "skill",
+      "nickname": "借刀杀人",
+      "realname": "借刀杀人",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "epic",
+      "className": "skill-item"
+    },
+    {
+      "type": "skill",
+      "nickname": "桃园结义",
+      "realname": "桃园结义",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "rare",
+      "className": "skill-item"
+    },
+    {
+      "type": "skill",
+      "nickname": "火爆辣椒",
+      "realname": "火爆辣椒",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "rare",
+      "className": "skill-item"
+    },
+    {
+      "type": "skill",
+      "nickname": "下个双倍",
+      "realname": "下个双倍",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "legend",
+      "className": "skill-item"
+    }
+  ],
+  "teachers": [
+    {
+      "type": "teacher",
+      "nickname": "90后金浪",
+      "realname": "金浪",
+      "avatarUrl": "https://pic1.imgdb.cn/item/6946ad3c29a616e528622640.png",
+      "hasAvatar": true,
+      "isSpecial": true,
+      "rarity": "legend",
+      "className": "teacher-item"
+    },
+    {
+      "type": "teacher",
+      "nickname": "风清扬",
+      "realname": "刘川",
+      "avatarUrl": "https://pic1.imgdb.cn/item/694fea95161224305eb30b63.jpg",
+      "hasAvatar": true,
+      "isSpecial": true,
+      "rarity": "epic",
+      "className": "teacher-item"
+    },
+    {
+      "type": "teacher",
+      "nickname": "刘超",
+      "realname": "刘超",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "epic",
+      "className": "teacher-item"
+    },
+    {
+      "type": "teacher",
+      "nickname": "王盼",
+      "realname": "王盼",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "rare",
+      "className": "teacher-item"
+    },
+    {
+      "type": "teacher",
+      "nickname": "覃勤",
+      "realname": "覃勤",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "rare",
+      "className": "teacher-item"
+    },
+    {
+      "type": "teacher",
+      "nickname": "韦建军",
+      "realname": "韦建军",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "rare",
+      "className": "teacher-item"
+    },
+    {
+      "type": "teacher",
+      "nickname": "王俊东",
+      "realname": "王俊东",
+      "avatarUrl": "",
+      "hasAvatar": false,
+      "isSpecial": true,
+      "rarity": "rare",
+      "className": "teacher-item"
+    }
+  ]
+}
