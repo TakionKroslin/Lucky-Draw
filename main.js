@@ -1,5 +1,4 @@
 const { app, BrowserWindow, session } = require('electron');
-const { autoUpdater } = require('electron-updater');
 
 function setupAvatarRequestHeaders() {
   // Some avatar CDNs reject requests without browser-like headers in Electron.
@@ -32,24 +31,9 @@ function createWindow() {
   win.loadFile('index.html');
 }
 
-function setupAutoUpdate() {
-  // Update checks only run in packaged builds.
-  if (!app.isPackaged) return;
-  autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
-  autoUpdater.on('error', (err) => console.warn('[updater] error', err && err.message));
-  autoUpdater.on('update-available', () => console.log('[updater] update available'));
-  autoUpdater.on('update-not-available', () => console.log('[updater] no update'));
-  autoUpdater.on('update-downloaded', () => console.log('[updater] downloaded, will install on quit'));
-  autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-    console.warn('[updater] check failed', err && err.message);
-  });
-}
-
 app.whenReady().then(() => {
   setupAvatarRequestHeaders();
   createWindow();
-  setupAutoUpdate();
 });
 
 app.on('window-all-closed', () => {

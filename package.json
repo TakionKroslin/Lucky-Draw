@@ -1,6 +1,6 @@
 {
   "name": "bie-jin-zhang",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "17班课堂点名与幸运抽取工具",
   "author": "Takion Kroslin",
   "license": "Apache-2.0",
@@ -12,8 +12,7 @@
   },
   "devDependencies": {
     "electron": "22.3.27",
-    "electron-builder": "^24.13.3",
-    "electron-updater": "^6.7.3"
+    "electron-builder": "^24.13.3"
   },
   "build": {
     "appId": "com.takion.biejinzhang",
