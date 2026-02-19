@@ -1618,26 +1618,55 @@
             avatarBox.style.setProperty('--glow', rand[0] + '33'); // 20%透明度
         }
 
+        // 缓存过滤结果以提高性能
+        const filterCache = new Map();
+        
+        function getFilterCacheKey() {
+            const bonusesKey = activeBonuses.slice().sort().join(',');
+            return `${currentGroup}|${bonusesKey}`;
+        }
+        
         function filterAndShuffleDatabase() {
+            const cacheKey = getFilterCacheKey();
+            
+            // 尝试从缓存获取已过滤的列表
+            if (filterCache.has(cacheKey)) {
+                const cached = filterCache.get(cacheKey);
+                filteredDatabase = cached.filteredDatabase;
+                shuffledList = [...cached.shuffledList]; // 创建副本以避免污染缓存
+                shuffleIndex = 0;
+                btnMain.disabled = false;
+                return true;
+            }
+            
             let studentList;
             if (currentGroup === '所有人') {
-                studentList = [...database];
+                studentList = database;
             } else {
+                // 使用filter创建新数组
                 studentList = database.filter(user => user.subject === currentGroup);
             }
 
             let specialItems = [];
             if (activeBonuses.includes('技能')) {
-                specialItems = specialItems.concat(SKILLS);
+                // 使用展开运算符替代concat以提高性能
+                specialItems = [...specialItems, ...SKILLS];
             }
             if (activeBonuses.includes('老师')) {
-                specialItems = specialItems.concat(TEACHERS);
+                specialItems = [...specialItems, ...TEACHERS];
             }
             
             if (studentList.length === 0 && specialItems.length > 0) {
                  filteredDatabase = specialItems;
             } else if (studentList.length > 0) {
-                filteredDatabase = studentList.concat(specialItems);
+                // 预分配数组大小以提高性能
+                filteredDatabase = new Array(studentList.length + specialItems.length);
+                for (let i = 0; i < studentList.length; i++) {
+                    filteredDatabase[i] = studentList[i];
+                }
+                for (let i = 0; i < specialItems.length; i++) {
+                    filteredDatabase[studentList.length + i] = specialItems[i];
+                }
             } else {
                 filteredDatabase = [];
             }
@@ -1650,13 +1679,25 @@
             
             btnMain.disabled = false;
             
-            shuffledList = [...filteredDatabase]; 
-            for (let i = shuffledList.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1)); 
-                [shuffledList[i], shuffledList[j]] = [shuffledList[j], shuffledList[i]];
+            // Fisher-Yates 洗牌算法 (原地洗牌)
+            shuffledList = [...filteredDatabase];
+            const n = shuffledList.length;
+            for (let i = n - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                // 使用临时变量交换元素
+                const temp = shuffledList[i];
+                shuffledList[i] = shuffledList[j];
+                shuffledList[j] = temp;
             }
             
             shuffleIndex = 0;
+            
+            // 缓存结果（不包括shuffleIndex，因为它会变化）
+            filterCache.set(cacheKey, {
+                filteredDatabase: filteredDatabase,
+                shuffledList: shuffledList
+            });
+            
             return true;
         }
 
@@ -1754,10 +1795,33 @@
             nameDisplay.style.backgroundColor = `rgba(250,250,250,${_alpha})`;
             nameDisplay.style.borderColor = "rgba(255,255,255,0.6)";
 
-            timer = setInterval(() => {
-                const randomIndex = Math.floor(Math.random() * filteredDatabase.length);
-                nameDisplay.innerText = filteredDatabase[randomIndex].nickname;
-            }, 50); 
+            // 使用 requestAnimationFrame 实现更高效的滚动动画
+            let lastTime = 0;
+            const rollInterval = 50; // 目标间隔 50ms
+            let accumulatedTime = 0;
+            
+            function rollAnimationFrame(timestamp) {
+                if (!isRolling) return;
+                
+                if (lastTime === 0) lastTime = timestamp;
+                const deltaTime = timestamp - lastTime;
+                lastTime = timestamp;
+                accumulatedTime += deltaTime;
+                
+                // 每 50ms 更新一次显示，保持原有速度
+                if (accumulatedTime >= rollInterval) {
+                    const randomIndex = Math.floor(Math.random() * filteredDatabase.length);
+                    nameDisplay.innerText = filteredDatabase[randomIndex].nickname;
+                    accumulatedTime -= rollInterval;
+                }
+                
+                if (isRolling) {
+                    requestAnimationFrame(rollAnimationFrame);
+                }
+            }
+            
+            // 启动动画循环
+            requestAnimationFrame(rollAnimationFrame);
             
             setTimeout(() => {
                 if (isRolling) { 
@@ -2089,135 +2153,139 @@
             }, 520);
         }
 
-        // --- 4. 事件监听器 ---
-
-        btnMain.addEventListener('click', () => {
-            unlockDrawAudioContext();
-            if (isInstantMode) {
-                startRolling(); 
-            } else {
-                if (isRolling) stopRolling();
-                else startRolling();
-            }
-        });
-
-        // 2. 空格键控制
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault(); 
-                if (btnMain.disabled) return; 
-                btnMain.click();
-            }
-        });
-
-        // 点击头像切换名字
-        avatarBox.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            toggleRealName(); 
-        });
-
-        // 修复：点击空白处复位
-        document.addEventListener('click', (e) => {
-            if (!btnFilter.contains(e.target) && !filterMenu.contains(e.target)) {
-                 if(filterMenu.classList.contains('open')) {
-                    filterMenu.classList.remove('open');
-                    btnFilter.classList.remove('active');
-                 }
-            }
-            
-            if (!avatarBox.contains(e.target) && isTilted()) {
-                restoreTilt();
-            }
-
-            hideToast(); // 【新增】点击任意处隐藏 Toast
-        });
-
-        btnFilter.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            forceStopRolling(); // 【新增】打开菜单时强制停止滚动
-            filterMenu.classList.toggle('open');
-            btnFilter.classList.toggle('active');
-        });
+        // --- 4. 事件监听器 (优化版，使用事件委托) ---
         
-        filterMenu.addEventListener('click', (e) => {
-             e.stopPropagation();
-        });
+        // 一次性事件绑定函数
+        function setupEventListeners() {
+            // 主按钮点击
+            btnMain.addEventListener('click', () => {
+                unlockDrawAudioContext();
+                if (isInstantMode) {
+                    startRolling(); 
+                } else {
+                    if (isRolling) stopRolling();
+                    else startRolling();
+                }
+            });
 
-        function handleFilterChange() {
-            forceStopRolling(); // 【新增】切换选项时强制停止
-            // 修复逻辑：切换选科时，先移除入场动画类并触发收缩隐藏动画，避免闪现
-            triggerShrinkHide();
-            // 清除歪头状态（同步清理）
-            if (isTilted()) {
-                avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim', 'is-tilted');
-            }
+            // 空格键控制
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault(); 
+                    if (btnMain.disabled) return; 
+                    btnMain.click();
+                }
+            });
 
-            // 等待收缩动画完成后再更新列表（略长于动画时长以保证过渡完成）
-            setTimeout(() => {
-                updateFilterButtonText();
-                filterAndShuffleDatabase();
-                prepareNextDraw();
-                nameDisplay.innerText = startPhrases[Math.floor(Math.random() * startPhrases.length)];
-                selectedUser = null;
-            }, 560);
-        }
+            // 点击头像切换名字
+            avatarBox.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                toggleRealName(); 
+            });
 
-        baseOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                const newGroup = option.dataset.value;
-                if (currentGroup !== newGroup) {
-                    baseOptions.forEach(o => o.classList.remove('selected'));
-                    option.classList.add('selected');
-                    currentGroup = newGroup;
+            // 点击空白处复位
+            document.addEventListener('click', (e) => {
+                const target = e.target;
+                
+                // 关闭过滤器菜单（如果打开且点击的是外部）
+                if (!btnFilter.contains(target) && !filterMenu.contains(target)) {
+                    if (filterMenu.classList.contains('open')) {
+                        filterMenu.classList.remove('open');
+                        btnFilter.classList.remove('active');
+                    }
+                }
+                
+                // 复位歪头动画（如果点击头像外部）
+                if (!avatarBox.contains(target) && isTilted()) {
+                    restoreTilt();
+                }
+
+                hideToast(); // 点击任意处隐藏 Toast
+            });
+
+            // 过滤器按钮
+            btnFilter.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                forceStopRolling(); // 打开菜单时强制停止滚动
+                filterMenu.classList.toggle('open');
+                btnFilter.classList.toggle('active');
+            });
+            
+            // 防止过滤器菜单点击传播
+            filterMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            // 使用事件委托处理过滤器选项点击
+            filterMenu.addEventListener('click', (e) => {
+                const target = e.target;
+                if (!target.classList.contains('filter-option')) return;
+                
+                const option = target;
+                const optionType = option.dataset.type;
+                const optionValue = option.dataset.value;
+                
+                // 处理基础选项（选科）
+                if (optionType === 'group') {
+                    const newGroup = optionValue;
+                    if (currentGroup !== newGroup) {
+                        // 更新选中状态
+                        baseOptions.forEach(o => o.classList.remove('selected'));
+                        option.classList.add('selected');
+                        currentGroup = newGroup;
+                        handleFilterChange();
+                    }
+                }
+                // 处理加成选项（技能/老师）
+                else if (optionType === 'bonus') {
+                    option.classList.toggle('selected');
+                    const bonusValue = optionValue;
+                    
+                    if (option.classList.contains('selected')) {
+                        if (!activeBonuses.includes(bonusValue)) activeBonuses.push(bonusValue);
+                    } else {
+                        activeBonuses = activeBonuses.filter(b => b !== bonusValue);
+                    }
                     handleFilterChange();
                 }
+                // 直接抽取模式按钮
+                else if (option === btnInstantMode) {
+                    handleInstantModeClick();
+                }
+                // 简易模式按钮
+                else if (option === btnSimpleMode) {
+                    handleSimpleModeClick();
+                }
+                
+                // 关闭菜单
                 filterMenu.classList.remove('open');
                 btnFilter.classList.remove('active');
             });
-        });
 
-        bonusOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                option.classList.toggle('selected');
-                const bonusValue = option.dataset.value;
+            // 直接抽取模式处理函数
+            function handleInstantModeClick() {
+                forceStopRolling(); // 防止冲突
                 
-                if (option.classList.contains('selected')) {
-                    if (!activeBonuses.includes(bonusValue)) activeBonuses.push(bonusValue);
-                } else {
-                    activeBonuses = activeBonuses.filter(b => b !== bonusValue);
+                // 互斥逻辑：如果开了简易模式，关掉它
+                if (isSimpleMode) {
+                    isSimpleMode = false;
+                    if (btnSimpleMode) btnSimpleMode.classList.remove('selected');
+                    if (topSection) topSection.classList.remove('hidden-mode'); // 恢复头像框
                 }
-                handleFilterChange();
-            });
-        });
 
-        // 3. 直接抽取模式切换
-        btnInstantMode.addEventListener('click', () => {
-            forceStopRolling(); // 【新增】防止冲突
-            
-            // 互斥逻辑：如果开了简易模式，关掉它
-            if (isSimpleMode) {
-                isSimpleMode = false;
-                if (btnSimpleMode) btnSimpleMode.classList.remove('selected');
-                if (topSection) topSection.classList.remove('hidden-mode'); // 恢复头像框
+                isInstantMode = !isInstantMode;
+                btnInstantMode.classList.toggle('selected');
+                
+                if (isInstantMode) {
+                    btnMain.innerText = "点击抽取";
+                } else {
+                    btnMain.innerText = "开始滚动";
+                }
             }
 
-            isInstantMode = !isInstantMode;
-            btnInstantMode.classList.toggle('selected');
-            
-            if (isInstantMode) {
-                btnMain.innerText = "点击抽取";
-            } else {
-                btnMain.innerText = "开始滚动";
-            }
-            
-            filterMenu.classList.remove('open');
-            btnFilter.classList.remove('active');
-        });
-
-        // 简易模式切换
-        if (btnSimpleMode) {
-            btnSimpleMode.addEventListener('click', () => {
-                forceStopRolling(); // 【新增】防止冲突
+            // 简易模式处理函数
+            function handleSimpleModeClick() {
+                forceStopRolling(); // 防止冲突
                 
                 isSimpleMode = !isSimpleMode;
                 btnSimpleMode.classList.toggle('selected');
@@ -2239,26 +2307,43 @@
                     btnMain.innerText = "开始滚动";
                     if (topSection) topSection.classList.remove('hidden-mode');
                 }
-                
-                filterMenu.classList.remove('open');
-                btnFilter.classList.remove('active');
+            }
+
+            // 功能面板相关事件
+            if (fpLaunch) {
+                fpLaunch.addEventListener('click', () => setFeaturePanelOpen(!isFeaturePanelOpen()));
+            }
+            if (fpMask) {
+                fpMask.addEventListener('click', () => setFeaturePanelOpen(false));
+            }
+            if (fpPreloadRetry) {
+                fpPreloadRetry.addEventListener('click', () => {
+                    preloadAllAvatars();
+                });
+            }
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') setFeaturePanelOpen(false);
             });
         }
 
-        if (fpLaunch) {
-            fpLaunch.addEventListener('click', () => setFeaturePanelOpen(!isFeaturePanelOpen()));
+        function handleFilterChange() {
+            forceStopRolling(); // 切换选项时强制停止
+            // 修复逻辑：切换选科时，先移除入场动画类并触发收缩隐藏动画，避免闪现
+            triggerShrinkHide();
+            // 清除歪头状态（同步清理）
+            if (isTilted()) {
+                avatarBox.classList.remove('tilt-left-anim', 'tilt-right-anim', 'tilt-drop-anim', 'tilt-recover-anim', 'is-tilted');
+            }
+
+            // 等待收缩动画完成后再更新列表（略长于动画时长以保证过渡完成）
+            setTimeout(() => {
+                updateFilterButtonText();
+                filterAndShuffleDatabase();
+                prepareNextDraw();
+                nameDisplay.innerText = startPhrases[Math.floor(Math.random() * startPhrases.length)];
+                selectedUser = null;
+            }, 560);
         }
-        if (fpMask) {
-            fpMask.addEventListener('click', () => setFeaturePanelOpen(false));
-        }
-        if (fpPreloadRetry) {
-            fpPreloadRetry.addEventListener('click', () => {
-                preloadAllAvatars();
-            });
-        }
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') setFeaturePanelOpen(false);
-        });
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
@@ -2273,6 +2358,9 @@
             nameDisplay.innerText = startPhrases[Math.floor(Math.random() * startPhrases.length)];
             setPreloadStatus('头像预加载：准备中...', 'warn');
             preloadAllAvatars();
+            
+            // 设置事件监听器
+            setupEventListeners();
         });
 
         // --- 背景光斑与交互光晕控制 ---
